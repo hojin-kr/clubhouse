@@ -30,7 +30,7 @@ var (
 	apple_bundle_id   = os.Getenv("APPLE_BUNDLE_ID")
 	apple_apns_key_id = os.Getenv("APPLE_APNS_KEY_ID")
 	apple_apns_key    = os.Getenv("APPLE_APNS_KEY")
-	is_production     = os.Getenv("IS_PRODUCTION")
+	environment       = os.Getenv("APP_ENVIRONMENT")
 )
 
 // server is used to implement UnimplementedServiceServer
@@ -478,7 +478,7 @@ func pushNotification(apnsTokens []string, title string, subtitle string, body s
 		ProductionGateway  = "https://api.push.apple.com"
 	)
 	GateWay := DevelopmentGateway
-	if is_production == "true" {
+	if environment == "production" {
 		GateWay = ProductionGateway
 	}
 	_apple_apns_key, _ := b64.StdEncoding.DecodeString(apple_apns_key)
