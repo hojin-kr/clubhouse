@@ -1,0 +1,79 @@
+name: Deploy to GCP CloudRun
+# todo
+
+on:
+  push:
+    branches:
+      - dev
+env:
+  PROJECT_ID: ${{ secrets.PROJECT_ID }}
+  APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+  APPLE_BUNDLE_ID: ${{ secrets.APPLE_BUNDLE_ID }}
+  APPLE_APNS_KEY_ID: ${{ secrets.APPLE_APNS_KEY_ID }}
+  APPLE_APNS_KEY: ${{ secrets.APPLE_APNS_KEY }}
+  IS_PRODUCTION: true
+  SERVICE_NAME: clubhouse
+  VERSION: ${GITHUB_STEP_SUMMARY}
+
+jobs:
+  setup-deploy:
+    name: Setup and Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # Setup gcloud CLI
+    - uses: google-github-actions/setup-gcloud@v0.2.0
+      with:
+        service_account_key: ${{ secrets.SA_KEY }}
+        project_id: ${{ secrets.PROJECT_ID }}
+
+    # Configure Docker to use the gcloud command-line tool as a credential
+    # helper for authentication
+    - run: |-
+        gcloud --quiet auth configure-docker
+
+    # Deploy - stop previous version
+    - name: Deploy - stop previous version
+      run: |-
+        gcloud builds submit -t gcr.io/${PROJECT_ID}/${SERVICE_NAME}:${VERSION} .
+        cat <<EOF > deployments/dev/cloudrun.yaml
+        apiVersion: serving.knative.dev/v1
+        kind: Service
+        metadata:
+          name: golf
+          annotations:
+            run.googleapis.com/ingress: all
+        spec:
+          template:
+            spec:
+              containerConcurrency: 80
+              timeoutSeconds: 300
+              serviceAccountName: golf-367911@appspot.gserviceaccount.com
+              containers:
+              - image: gcr.io/${PROJECT_ID}/${SERVICE_NAME}:${VERSION}
+                ports:
+                - name: h2c
+                  containerPort: 50051
+                env:
+                - name: IS_PRODUCTION
+                  value: ${IS_PRODUCTION}
+                - name: PROJECT_ID
+                  value: ${PROJECT_ID}
+                - name: APPLE_TEAM_ID
+                  value: ${APPLE_TEAM_ID}
+                - name: APPLE_BUNDLE_ID
+                  value : ${APPLE_BUNDLE_ID}
+                - name: APPLE_APNS_KEY_ID
+                  value : ${APPLE_APNS_KEY_ID}
+                - name : APPLE_APNS_KEY
+                  value : ${APPLE_APNS_KEY}
+                resources:
+                  limits:
+                    cpu: 1000m
+                    memory: 512Mi
+        EOF
+        gcloud run services replace deployments/dev/cloudrun.yaml --region=asia-northeast3

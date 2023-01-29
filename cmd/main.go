@@ -14,10 +14,10 @@ import (
 
 	"cloud.google.com/go/datastore"
 	apns "github.com/edganiukov/apns"
-	data "github.com/hojin-kr/haru/cmd/data"
-	ds "github.com/hojin-kr/haru/cmd/ds"
-	pb "github.com/hojin-kr/haru/cmd/proto"
-	"github.com/hojin-kr/haru/cmd/trace"
+	data "github.com/hojin-kr/clubhouse/cmd/data"
+	ds "github.com/hojin-kr/clubhouse/cmd/ds"
+	pb "github.com/hojin-kr/clubhouse/cmd/proto"
+	"github.com/hojin-kr/clubhouse/cmd/trace"
 	"google.golang.org/api/iterator"
 	"google.golang.org/grpc"
 )
