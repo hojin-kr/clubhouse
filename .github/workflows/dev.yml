@@ -39,8 +39,8 @@ jobs:
     # Deploy - stop previous version
     - name: Deploy - stop previous version
       run: |-
-        gcloud config set project ${PROJECT_ID}
-        gcloud builds submit -t gcr.io/${PROJECT_ID}/${SERVICE_NAME}:${VERSION} .
+        gcloud config set project $PROJECT_ID
+        gcloud builds submit -t gcr.io/$PROJECT_ID/$SERVICE_NAME:$VERSION .
         cat <<EOF > deployments/dev/cloudrun.yaml
         apiVersion: serving.knative.dev/v1
         kind: Service
@@ -55,23 +55,23 @@ jobs:
               timeoutSeconds: 300
               serviceAccountName: golf-367911@appspot.gserviceaccount.com
               containers:
-              - image: gcr.io/${PROJECT_ID}/${SERVICE_NAME}:${VERSION}
+              - image: gcr.io/$PROJECT_ID/$SERVICE_NAME:$VERSION
                 ports:
                 - name: h2c
                   containerPort: 50051
                 env:
                 - name: IS_PRODUCTION
-                  value: ${IS_PRODUCTION}
+                  value: $IS_PRODUCTION
                 - name: PROJECT_ID
-                  value: ${PROJECT_ID}
+                  value: $PROJECT_ID
                 - name: APPLE_TEAM_ID
-                  value: ${APPLE_TEAM_ID}
+                  value: $APPLE_TEAM_ID
                 - name: APPLE_BUNDLE_ID
-                  value : ${APPLE_BUNDLE_ID}
+                  value : $APPLE_BUNDLE_ID
                 - name: APPLE_APNS_KEY_ID
-                  value : ${APPLE_APNS_KEY_ID}
+                  value : $APPLE_APNS_KEY_ID
                 - name : APPLE_APNS_KEY
-                  value : ${APPLE_APNS_KEY}
+                  value : $APPLE_APNS_KEY
                 resources:
                   limits:
                     cpu: 1000m
