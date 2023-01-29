@@ -39,6 +39,7 @@ jobs:
     # Deploy - stop previous version
     - name: Deploy - stop previous version
       run: |-
+        gcloud config set project ${PROJECT_ID}
         gcloud builds submit -t gcr.io/${PROJECT_ID}/${SERVICE_NAME}:${VERSION} .
         cat <<EOF > deployments/dev/cloudrun.yaml
         apiVersion: serving.knative.dev/v1
