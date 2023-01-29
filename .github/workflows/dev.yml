@@ -5,15 +5,16 @@ on:
   push:
     branches:
       - dev
+env:
+  IS_PRODUCTION: true
+  SERVICE_NAME: clubhouse
+  VERSION: ${GITHUB_STEP_SUMMARY}
 
 jobs:
   setup-deploy:
     name: Setup and Deploy
     runs-on: ubuntu-latest
-    env:
-      IS_PRODUCTION: true
-      SERVICE_NAME: clubhouse
-      VERSION: ${GITHUB_STEP_SUMMARY}
+
     environment: Clubhouse
 
     steps:
@@ -24,6 +25,7 @@ jobs:
     - uses: google-github-actions/setup-gcloud@v0.2.0
       with:
         credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
+        service_account_key: ${{ secrets.SA_KEY }}
         project_id: ${{ secrets.PROJECT_ID }}
 
     # Configure Docker to use the gcloud command-line tool as a credential
