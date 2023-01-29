@@ -5,20 +5,20 @@ on:
   push:
     branches:
       - dev
-env:
-  PROJECT_ID: ${{ secrets.PROJECT_ID }}
-  APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-  APPLE_BUNDLE_ID: ${{ secrets.APPLE_BUNDLE_ID }}
-  APPLE_APNS_KEY_ID: ${{ secrets.APPLE_APNS_KEY_ID }}
-  APPLE_APNS_KEY: ${{ secrets.APPLE_APNS_KEY }}
-  IS_PRODUCTION: true
-  SERVICE_NAME: clubhouse
-  VERSION: ${GITHUB_STEP_SUMMARY}
 
 jobs:
   setup-deploy:
     name: Setup and Deploy
     runs-on: ubuntu-latest
+    env:
+      PROJECT_ID: ${{ secrets.PROJECT_ID }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      APPLE_BUNDLE_ID: ${{ secrets.APPLE_BUNDLE_ID }}
+      APPLE_APNS_KEY_ID: ${{ secrets.APPLE_APNS_KEY_ID }}
+      APPLE_APNS_KEY: ${{ secrets.APPLE_APNS_KEY }}
+      IS_PRODUCTION: true
+      SERVICE_NAME: clubhouse
+      VERSION: ${GITHUB_STEP_SUMMARY}
     environment: production
 
     steps:
