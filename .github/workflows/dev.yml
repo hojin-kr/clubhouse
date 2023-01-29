@@ -8,7 +8,6 @@ on:
 env:
   IS_PRODUCTION: true
   SERVICE_NAME: clubhouse
-  VERSION: ${GITHUB_SHA}
 
 jobs:
   setup-deploy:
@@ -40,7 +39,7 @@ jobs:
     # Deploy - stop previous version
     - name: Deploy - stop previous version
       run: |-
-        gcloud builds submit -t gcr.io/${{ secrets.PROJECT_ID }}/${SERVICE_NAME}:${VERSION} .
+        gcloud builds submit -t gcr.io/${{ secrets.PROJECT_ID }}/${SERVICE_NAME}:${GITHUB_SHA} .
         cat <<EOF > deployments/dev/cloudrun.yaml
         apiVersion: serving.knative.dev/v1
         kind: Service
@@ -55,7 +54,7 @@ jobs:
               timeoutSeconds: 300
               serviceAccountName: golf-367911@appspot.gserviceaccount.com
               containers:
-              - image: gcr.io/${{ secrets.PROJECT_ID }}/${SERVICE_NAME}:${VERSION}
+              - image: gcr.io/${{ secrets.PROJECT_ID }}/${SERVICE_NAME}:${GITHUB_SHA}
                 ports:
                 - name: h2c
                   containerPort: 50051
