@@ -6,7 +6,7 @@ on:
     branches:
       - dev
 env:
-  IS_PRODUCTION: true
+  IS_PRODUCTION: "true"
   SERVICE_NAME: clubhouse
 
 jobs:
