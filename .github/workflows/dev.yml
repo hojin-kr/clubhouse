@@ -8,7 +8,7 @@ on:
 env:
   IS_PRODUCTION: true
   SERVICE_NAME: clubhouse
-  VERSION: ${GITHUB_STEP_SUMMARY}
+  VERSION: ${GITHUB_SHA}
 
 jobs:
   setup-deploy:
