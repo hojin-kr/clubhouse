@@ -157,7 +157,7 @@ func (s *server) GetFilterdGames(ctx context.Context, in *pb.FilterdGamesRequest
 	if _, ok := filterTypes[in.TypeFilter]; ok {
 		query = queryBase.
 			Filter(filterTypes[in.TypeFilter]+" =", in.TypeFilter).
-			Order(filterTypes[in.TypeFilter]).
+			Order(orderTypes[in.TypeOrder]).
 			Limit(pageSize)
 	}
 

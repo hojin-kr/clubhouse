@@ -88,3 +88,8 @@ indexes:
   - name: Category
   - name: Type
   - name: Created
+
+- kind: GameList
+  properties:
+  - name: TypePlay
+  - name: Created
