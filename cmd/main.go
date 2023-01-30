@@ -144,22 +144,15 @@ func (s *server) GetFilterdGames(ctx context.Context, in *pb.FilterdGamesRequest
 		4: "Price",
 		5: "-Price",
 	}
-	var filterTypes = map[int64]string{
-		0: "TypePlay",
-		1: "TypePlay",
-	}
 
 	queryBase := datastore.NewQuery("GameList")
-	query := queryBase.
+	query := queryBase
+	for i := 0; i < len(in.Filter); i++ {
+		query = query.Filter(in.Filter[i].Key+" =", in.Filter[i].Value)
+	}
+	query = query.
 		Order(orderTypes[in.TypeOrder]).
 		Limit(pageSize)
-
-	if _, ok := filterTypes[in.TypeFilter]; ok {
-		query = queryBase.
-			Filter(filterTypes[in.TypeFilter]+" =", in.TypeFilter).
-			Order(orderTypes[in.TypeOrder]).
-			Limit(pageSize)
-	}
 
 	if cursorStr != "" {
 		cursor, err := datastore.DecodeCursor(cursorStr)

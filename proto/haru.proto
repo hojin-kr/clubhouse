@@ -265,8 +265,13 @@ message FilterdGamesRequest {
   int64 time_min = 2;
   int64 time_max = 3;
   int64 type_order = 4;
-  int64 type_filter = 5;
+  repeated GameFilter filter = 5;
   string cursor = 6;
+}
+
+message GameFilter {
+  string key = 1;
+  int64 value = 2;
 }
 
 message FilterdGamesReply {

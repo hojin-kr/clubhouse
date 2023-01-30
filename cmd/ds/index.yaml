@@ -93,3 +93,36 @@ indexes:
   properties:
   - name: TypePlay
   - name: Created
+
+- kind: GameList
+  properties:
+  - name: Person
+  - name: Created
+
+- kind: GameList
+  properties:
+  - name: Person
+  - name: Created
+    direction: desc
+
+- kind: GameList
+  properties:
+  - name: Person
+  - name: Time
+
+- kind: GameList
+  properties:
+  - name: Person
+  - name: Time
+    direction: desc
+
+- kind: GameList
+  properties:
+  - name: Person
+  - name: Price
+
+- kind: GameList
+  properties:
+  - name: Person
+  - name: Price
+    direction: desc
