@@ -89,6 +89,13 @@ indexes:
   - name: Type
   - name: Created
 
+- kind: Article
+  properties:
+  - name: Category
+  - name: Type
+  - name: Created
+    direction: desc
+
 - kind: GameList
   properties:
   - name: TypePlay
