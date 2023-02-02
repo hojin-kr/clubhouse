@@ -86,8 +86,8 @@ func (s *server) CreateGame(ctx context.Context, in *pb.GameRequest) (*pb.GameRe
 	key := ds.Put(ctx, datastore.IncompleteKey("Game", nil), game)
 	game.Id = key.ID
 	game.Created = time.Now().UTC().Unix()
-	go ds.Put(ctx, datastore.IDKey("Game", key.ID, nil), game)
-	go ds.Put(ctx, datastore.IDKey("GameList", key.ID, nil), game) // 리스트에 뿌려주는 용도이며 TTL 세팅해서 지워지게
+	ds.Put(ctx, datastore.IDKey("Game", key.ID, nil), game)
+	ds.Put(ctx, datastore.IDKey("GameList", key.ID, nil), game) // 리스트에 뿌려주는 용도이며 TTL 세팅해서 지워지게
 	ret := &pb.GameReply{Game: game}
 	tracer.Trace(time.Now().UTC(), ret)
 	return ret, nil
@@ -516,7 +516,7 @@ func (s *server) CreateArticle(ctx context.Context, in *pb.ArticleRequest) (*pb.
 	log.Print("cret")
 	put := ds.Put(ctx, datastore.IncompleteKey("Article", nil), article)
 	article.Id = put.ID
-	go ds.Put(ctx, datastore.IDKey("Article", put.ID, nil), article)
+	ds.Put(ctx, datastore.IDKey("Article", put.ID, nil), article)
 	ret := &pb.ArticleReply{Article: article}
 	tracer.Trace(time.Now().UTC(), ret)
 	return ret, nil
