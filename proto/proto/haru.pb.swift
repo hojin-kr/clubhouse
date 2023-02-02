@@ -238,7 +238,7 @@ struct Haru_Chat {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var gameID: Int64 = 0
+  var foreginID: Int64 = 0
 
   var accountID: Int64 = 0
 
@@ -274,7 +274,7 @@ struct Haru_ChatMessageRequest {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var gameID: Int64 = 0
+  var foreginID: Int64 = 0
 
   var accountID: Int64 = 0
 
@@ -1381,7 +1381,7 @@ extension Haru_JoinReply: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
 extension Haru_Chat: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Chat"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "game_id"),
+    1: .standard(proto: "foregin_id"),
     2: .standard(proto: "account_id"),
     3: .same(proto: "created"),
     4: .same(proto: "updated"),
@@ -1394,7 +1394,7 @@ extension Haru_Chat: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementation
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularInt64Field(value: &self.gameID) }()
+      case 1: try { try decoder.decodeSingularInt64Field(value: &self.foreginID) }()
       case 2: try { try decoder.decodeSingularInt64Field(value: &self.accountID) }()
       case 3: try { try decoder.decodeSingularInt64Field(value: &self.created) }()
       case 4: try { try decoder.decodeSingularInt64Field(value: &self.updated) }()
@@ -1405,8 +1405,8 @@ extension Haru_Chat: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementation
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if self.gameID != 0 {
-      try visitor.visitSingularInt64Field(value: self.gameID, fieldNumber: 1)
+    if self.foreginID != 0 {
+      try visitor.visitSingularInt64Field(value: self.foreginID, fieldNumber: 1)
     }
     if self.accountID != 0 {
       try visitor.visitSingularInt64Field(value: self.accountID, fieldNumber: 2)
@@ -1424,7 +1424,7 @@ extension Haru_Chat: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementation
   }
 
   static func ==(lhs: Haru_Chat, rhs: Haru_Chat) -> Bool {
-    if lhs.gameID != rhs.gameID {return false}
+    if lhs.foreginID != rhs.foreginID {return false}
     if lhs.accountID != rhs.accountID {return false}
     if lhs.created != rhs.created {return false}
     if lhs.updated != rhs.updated {return false}
@@ -1481,7 +1481,7 @@ extension Haru_ChatMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
 extension Haru_ChatMessageRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ChatMessageRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "game_id"),
+    1: .standard(proto: "foregin_id"),
     2: .standard(proto: "account_id"),
     3: .standard(proto: "chat_message"),
   ]
@@ -1492,7 +1492,7 @@ extension Haru_ChatMessageRequest: SwiftProtobuf.Message, SwiftProtobuf._Message
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularInt64Field(value: &self.gameID) }()
+      case 1: try { try decoder.decodeSingularInt64Field(value: &self.foreginID) }()
       case 2: try { try decoder.decodeSingularInt64Field(value: &self.accountID) }()
       case 3: try { try decoder.decodeSingularMessageField(value: &self._chatMessage) }()
       default: break
@@ -1505,8 +1505,8 @@ extension Haru_ChatMessageRequest: SwiftProtobuf.Message, SwiftProtobuf._Message
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
     // https://github.com/apple/swift-protobuf/issues/1182
-    if self.gameID != 0 {
-      try visitor.visitSingularInt64Field(value: self.gameID, fieldNumber: 1)
+    if self.foreginID != 0 {
+      try visitor.visitSingularInt64Field(value: self.foreginID, fieldNumber: 1)
     }
     if self.accountID != 0 {
       try visitor.visitSingularInt64Field(value: self.accountID, fieldNumber: 2)
@@ -1518,7 +1518,7 @@ extension Haru_ChatMessageRequest: SwiftProtobuf.Message, SwiftProtobuf._Message
   }
 
   static func ==(lhs: Haru_ChatMessageRequest, rhs: Haru_ChatMessageRequest) -> Bool {
-    if lhs.gameID != rhs.gameID {return false}
+    if lhs.foreginID != rhs.foreginID {return false}
     if lhs.accountID != rhs.accountID {return false}
     if lhs._chatMessage != rhs._chatMessage {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}

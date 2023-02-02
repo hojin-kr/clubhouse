@@ -349,7 +349,7 @@ func (s *server) GetChat(ctx context.Context, in *pb.ChatRequest) (*pb.ChatReply
 	tracer.Trace(time.Now().UTC(), in)
 	var chats []*pb.Chat
 	const pageSize = 100
-	q := datastore.NewQuery("Chat").Filter("GameId =", in.Chat.GetGameId()).Order("Created").Limit(pageSize)
+	q := datastore.NewQuery("Chat").Filter("ForeginId =", in.Chat.GetForeginId()).Order("Created").Limit(pageSize)
 	ds.GetAll(ctx, q, &chats)
 	ret := &pb.ChatReply{Chats: chats, Cursor: ""}
 	tracer.Trace(time.Now().UTC(), ret)
@@ -361,11 +361,11 @@ func (s *server) AddChatMessage(ctx context.Context, in *pb.ChatMessageRequest) 
 	tracer.Trace(time.Now().UTC(), in)
 	var Chat pb.Chat
 	// get
-	key := datastore.NameKey("Chat", strconv.FormatInt(in.GetGameId()+in.GetAccountId(), 10), nil)
+	key := datastore.NameKey("Chat", strconv.FormatInt(in.GetForeginId()+in.GetAccountId(), 10), nil)
 	ds.Get(ctx, key, &Chat)
 	// append & put
 	Chat.AccountId = in.GetAccountId()
-	Chat.GameId = in.GetGameId()
+	Chat.ForeginId = in.GetForeginId()
 
 	NowUnix := time.Now().UTC().Unix()
 	Chat.Updated = NowUnix
@@ -379,12 +379,12 @@ func (s *server) AddChatMessage(ctx context.Context, in *pb.ChatMessageRequest) 
 	// return all chats
 	var chats []*pb.Chat
 	const pageSize = 100
-	q := datastore.NewQuery("Chat").Filter("GameId =", in.GetGameId()).Order("Created").Limit(pageSize)
+	q := datastore.NewQuery("Chat").Filter("ForeginId =", in.GetForeginId()).Order("Created").Limit(pageSize)
 	ds.GetAll(ctx, q, &chats)
-	log.Printf(strconv.FormatInt(in.GetGameId(), 10))
+	log.Printf(strconv.FormatInt(in.GetForeginId(), 10))
 	ret := &pb.ChatReply{Chats: chats}
 	_ctx := context.Background()
-	go setChatPush(_ctx, in.GameId, in.GetAccountId(), in.ChatMessage.Message)
+	go setChatPush(_ctx, in.ForeginId, in.GetAccountId(), in.ChatMessage.Message)
 	tracer.Trace(time.Now().UTC(), ret)
 	return ret, nil
 }

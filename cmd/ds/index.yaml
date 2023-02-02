@@ -83,6 +83,11 @@ indexes:
   - name: GameId
   - name: Created
 
+- kind: Chat
+  properties:
+  - name: ForeginId
+  - name: Created
+
 - kind: Article
   properties:
   - name: Category

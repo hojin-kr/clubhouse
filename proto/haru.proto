@@ -112,7 +112,7 @@ message JoinReply {
 }
 
 message Chat {
-  int64 game_id = 1;
+  int64 foregin_id = 1;
   int64 account_id = 2;
   int64 created = 3;
   int64 updated = 4;
@@ -126,7 +126,7 @@ message ChatMessage {
 }
 
 message ChatMessageRequest {
-  int64 game_id = 1;
+  int64 foregin_id = 1;
   int64 account_id = 2;
   ChatMessage chat_message = 3;
 }
