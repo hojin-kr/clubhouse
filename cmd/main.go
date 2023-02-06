@@ -540,7 +540,7 @@ func (s *server) GetFilterdArticles(ctx context.Context, in *pb.FilterdArticlesR
 	query := queryBase.Order("-Created").Filter("Category =", in.Category).Filter("Type = ", in.Type).Limit(pageSize)
 	const typeAccount = 2
 	if in.Type == typeAccount {
-		query = queryBase.Order("-Created").Filter("AccountId =", in.AccountId).Filter("Type = ", in.Type).Limit(pageSize)
+		query = queryBase.Order("-Created").Filter("AccountId =", in.AccountId).Limit(pageSize)
 	}
 
 	if cursorStr != "" {

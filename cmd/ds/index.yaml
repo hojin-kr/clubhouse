@@ -104,7 +104,6 @@ indexes:
 - kind: Article
   properties:
   - name: AccountId
-  - name: Type
   - name: Created
     direction: desc
 
