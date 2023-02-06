@@ -125,6 +125,7 @@ func (s *server) UpdateGame(ctx context.Context, in *pb.GameRequest) (*pb.GameRe
 	_ctx := context.Background()
 	go setJoinChangePush(_ctx, in, &gameBefore)
 	_ = ds.Put(ctx, IDKey, in.Game)
+	_ = ds.Put(ctx, datastore.IDKey("GameList", in.Game.GetId(), nil), in.Game)
 	ret := &pb.GameReply{Game: in.GetGame()}
 	tracer.Trace(time.Now().UTC(), ret)
 	return ret, nil
