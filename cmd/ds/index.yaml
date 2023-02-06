@@ -101,6 +101,13 @@ indexes:
   - name: Created
     direction: desc
 
+- kind: Article
+  properties:
+  - name: AccountId
+  - name: Type
+  - name: Created
+    direction: desc
+
 - kind: GameList
   properties:
   - name: TypePlay

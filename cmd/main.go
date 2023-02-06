@@ -537,8 +537,12 @@ func (s *server) GetFilterdArticles(ctx context.Context, in *pb.FilterdArticlesR
 	cursorStr := in.Cursor
 	const pageSize = 10
 	queryBase := datastore.NewQuery("Article")
-	// todo re article
 	query := queryBase.Order("-Created").Filter("Category =", in.Category).Filter("Type = ", in.Type).Limit(pageSize)
+	const typeAccount = 2
+	if in.Type == typeAccount {
+		query = queryBase.Order("-Created").Filter("AccountId =", in.AccountId).Filter("Type = ", in.Type).Limit(pageSize)
+	}
+
 	if cursorStr != "" {
 		cursor, err := datastore.DecodeCursor(cursorStr)
 		if err != nil {
