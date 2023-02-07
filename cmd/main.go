@@ -169,7 +169,7 @@ func (s *server) GetFilterdGames(ctx context.Context, in *pb.FilterdGamesRequest
 	_, err := it.Next(&game)
 	for err == nil {
 		games = append(games, game)
-		log.Print(game.Price)
+		game = pb.Game{}
 		_, err = it.Next(&game)
 	}
 	if err != iterator.Done {
@@ -244,6 +244,7 @@ func (s *server) GetMyJoins(ctx context.Context, in *pb.JoinRequest) (*pb.JoinRe
 	_, err := it.Next(&join)
 	for err == nil {
 		joins = append(joins, join)
+		join = pb.Join{}
 		_, err = it.Next(&join)
 	}
 	if err != iterator.Done {
@@ -285,6 +286,7 @@ func (s *server) GetMyBeforeJoins(ctx context.Context, in *pb.JoinRequest) (*pb.
 	_, err := it.Next(&join)
 	for err == nil {
 		joins = append(joins, join)
+		join = pb.Join{}
 		_, err = it.Next(&join)
 	}
 	if err != iterator.Done {
@@ -326,6 +328,7 @@ func (s *server) GetGameJoins(ctx context.Context, in *pb.JoinRequest) (*pb.Join
 	_, err := it.Next(&join)
 	for err == nil {
 		joins = append(joins, join)
+		join = pb.Join{}
 		_, err = it.Next(&join)
 	}
 	if err != iterator.Done {
@@ -558,6 +561,7 @@ func (s *server) GetFilterdArticles(ctx context.Context, in *pb.FilterdArticlesR
 	// todo multi get likes 카운팅할지 고민
 	for err == nil {
 		articles = append(articles, article)
+		article = pb.Article{}
 		_, err = it.Next(&article)
 	}
 	if err != iterator.Done {
