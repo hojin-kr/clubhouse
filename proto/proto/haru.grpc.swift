@@ -108,11 +108,6 @@ internal protocol Haru_version1ClientProtocol: GRPCClient {
     callOptions: CallOptions?
   ) -> UnaryCall<Haru_ChatMessageRequest, Haru_ChatReply>
 
-  func getDataPlace(
-    _ request: Haru_DataPlaceRequest,
-    callOptions: CallOptions?
-  ) -> UnaryCall<Haru_DataPlaceRequest, Haru_DataPlaceReply>
-
   func getFilterdArticles(
     _ request: Haru_FilterdArticlesRequest,
     callOptions: CallOptions?
@@ -147,6 +142,11 @@ internal protocol Haru_version1ClientProtocol: GRPCClient {
     _ request: Haru_Count,
     callOptions: CallOptions?
   ) -> UnaryCall<Haru_Count, Haru_Count>
+
+  func getPlaceKaKao(
+    _ request: Haru_PlaceKakaoRequest,
+    callOptions: CallOptions?
+  ) -> UnaryCall<Haru_PlaceKakaoRequest, Haru_PlaceKakaoReply>
 }
 
 extension Haru_version1ClientProtocol {
@@ -424,24 +424,6 @@ extension Haru_version1ClientProtocol {
     )
   }
 
-  /// Unary call to GetDataPlace
-  ///
-  /// - Parameters:
-  ///   - request: Request to send to GetDataPlace.
-  ///   - callOptions: Call options.
-  /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
-  internal func getDataPlace(
-    _ request: Haru_DataPlaceRequest,
-    callOptions: CallOptions? = nil
-  ) -> UnaryCall<Haru_DataPlaceRequest, Haru_DataPlaceReply> {
-    return self.makeUnaryCall(
-      path: Haru_version1ClientMetadata.Methods.getDataPlace.path,
-      request: request,
-      callOptions: callOptions ?? self.defaultCallOptions,
-      interceptors: self.interceptors?.makeGetDataPlaceInterceptors() ?? []
-    )
-  }
-
   /// Unary call to GetFilterdArticles
   ///
   /// - Parameters:
@@ -565,6 +547,24 @@ extension Haru_version1ClientProtocol {
       request: request,
       callOptions: callOptions ?? self.defaultCallOptions,
       interceptors: self.interceptors?.makeGetCountInterceptors() ?? []
+    )
+  }
+
+  /// Unary call to GetPlaceKaKao
+  ///
+  /// - Parameters:
+  ///   - request: Request to send to GetPlaceKaKao.
+  ///   - callOptions: Call options.
+  /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
+  internal func getPlaceKaKao(
+    _ request: Haru_PlaceKakaoRequest,
+    callOptions: CallOptions? = nil
+  ) -> UnaryCall<Haru_PlaceKakaoRequest, Haru_PlaceKakaoReply> {
+    return self.makeUnaryCall(
+      path: Haru_version1ClientMetadata.Methods.getPlaceKaKao.path,
+      request: request,
+      callOptions: callOptions ?? self.defaultCallOptions,
+      interceptors: self.interceptors?.makeGetPlaceKaKaoInterceptors() ?? []
     )
   }
 }
@@ -710,11 +710,6 @@ internal protocol Haru_version1AsyncClientProtocol: GRPCClient {
     callOptions: CallOptions?
   ) -> GRPCAsyncUnaryCall<Haru_ChatMessageRequest, Haru_ChatReply>
 
-  func makeGetDataPlaceCall(
-    _ request: Haru_DataPlaceRequest,
-    callOptions: CallOptions?
-  ) -> GRPCAsyncUnaryCall<Haru_DataPlaceRequest, Haru_DataPlaceReply>
-
   func makeGetFilterdArticlesCall(
     _ request: Haru_FilterdArticlesRequest,
     callOptions: CallOptions?
@@ -749,6 +744,11 @@ internal protocol Haru_version1AsyncClientProtocol: GRPCClient {
     _ request: Haru_Count,
     callOptions: CallOptions?
   ) -> GRPCAsyncUnaryCall<Haru_Count, Haru_Count>
+
+  func makeGetPlaceKaKaoCall(
+    _ request: Haru_PlaceKakaoRequest,
+    callOptions: CallOptions?
+  ) -> GRPCAsyncUnaryCall<Haru_PlaceKakaoRequest, Haru_PlaceKakaoReply>
 }
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
@@ -941,18 +941,6 @@ extension Haru_version1AsyncClientProtocol {
     )
   }
 
-  internal func makeGetDataPlaceCall(
-    _ request: Haru_DataPlaceRequest,
-    callOptions: CallOptions? = nil
-  ) -> GRPCAsyncUnaryCall<Haru_DataPlaceRequest, Haru_DataPlaceReply> {
-    return self.makeAsyncUnaryCall(
-      path: Haru_version1ClientMetadata.Methods.getDataPlace.path,
-      request: request,
-      callOptions: callOptions ?? self.defaultCallOptions,
-      interceptors: self.interceptors?.makeGetDataPlaceInterceptors() ?? []
-    )
-  }
-
   internal func makeGetFilterdArticlesCall(
     _ request: Haru_FilterdArticlesRequest,
     callOptions: CallOptions? = nil
@@ -1034,6 +1022,18 @@ extension Haru_version1AsyncClientProtocol {
       request: request,
       callOptions: callOptions ?? self.defaultCallOptions,
       interceptors: self.interceptors?.makeGetCountInterceptors() ?? []
+    )
+  }
+
+  internal func makeGetPlaceKaKaoCall(
+    _ request: Haru_PlaceKakaoRequest,
+    callOptions: CallOptions? = nil
+  ) -> GRPCAsyncUnaryCall<Haru_PlaceKakaoRequest, Haru_PlaceKakaoReply> {
+    return self.makeAsyncUnaryCall(
+      path: Haru_version1ClientMetadata.Methods.getPlaceKaKao.path,
+      request: request,
+      callOptions: callOptions ?? self.defaultCallOptions,
+      interceptors: self.interceptors?.makeGetPlaceKaKaoInterceptors() ?? []
     )
   }
 }
@@ -1220,18 +1220,6 @@ extension Haru_version1AsyncClientProtocol {
     )
   }
 
-  internal func getDataPlace(
-    _ request: Haru_DataPlaceRequest,
-    callOptions: CallOptions? = nil
-  ) async throws -> Haru_DataPlaceReply {
-    return try await self.performAsyncUnaryCall(
-      path: Haru_version1ClientMetadata.Methods.getDataPlace.path,
-      request: request,
-      callOptions: callOptions ?? self.defaultCallOptions,
-      interceptors: self.interceptors?.makeGetDataPlaceInterceptors() ?? []
-    )
-  }
-
   internal func getFilterdArticles(
     _ request: Haru_FilterdArticlesRequest,
     callOptions: CallOptions? = nil
@@ -1315,6 +1303,18 @@ extension Haru_version1AsyncClientProtocol {
       interceptors: self.interceptors?.makeGetCountInterceptors() ?? []
     )
   }
+
+  internal func getPlaceKaKao(
+    _ request: Haru_PlaceKakaoRequest,
+    callOptions: CallOptions? = nil
+  ) async throws -> Haru_PlaceKakaoReply {
+    return try await self.performAsyncUnaryCall(
+      path: Haru_version1ClientMetadata.Methods.getPlaceKaKao.path,
+      request: request,
+      callOptions: callOptions ?? self.defaultCallOptions,
+      interceptors: self.interceptors?.makeGetPlaceKaKaoInterceptors() ?? []
+    )
+  }
 }
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
@@ -1383,9 +1383,6 @@ internal protocol Haru_version1ClientInterceptorFactoryProtocol: GRPCSendable {
   /// - Returns: Interceptors to use when invoking 'addChatMessage'.
   func makeAddChatMessageInterceptors() -> [ClientInterceptor<Haru_ChatMessageRequest, Haru_ChatReply>]
 
-  /// - Returns: Interceptors to use when invoking 'getDataPlace'.
-  func makeGetDataPlaceInterceptors() -> [ClientInterceptor<Haru_DataPlaceRequest, Haru_DataPlaceReply>]
-
   /// - Returns: Interceptors to use when invoking 'getFilterdArticles'.
   func makeGetFilterdArticlesInterceptors() -> [ClientInterceptor<Haru_FilterdArticlesRequest, Haru_FilterdArticlesReply>]
 
@@ -1406,6 +1403,9 @@ internal protocol Haru_version1ClientInterceptorFactoryProtocol: GRPCSendable {
 
   /// - Returns: Interceptors to use when invoking 'getCount'.
   func makeGetCountInterceptors() -> [ClientInterceptor<Haru_Count, Haru_Count>]
+
+  /// - Returns: Interceptors to use when invoking 'getPlaceKaKao'.
+  func makeGetPlaceKaKaoInterceptors() -> [ClientInterceptor<Haru_PlaceKakaoRequest, Haru_PlaceKakaoReply>]
 }
 
 internal enum Haru_version1ClientMetadata {
@@ -1428,7 +1428,6 @@ internal enum Haru_version1ClientMetadata {
       Haru_version1ClientMetadata.Methods.updateJoin,
       Haru_version1ClientMetadata.Methods.getChat,
       Haru_version1ClientMetadata.Methods.addChatMessage,
-      Haru_version1ClientMetadata.Methods.getDataPlace,
       Haru_version1ClientMetadata.Methods.getFilterdArticles,
       Haru_version1ClientMetadata.Methods.createArticle,
       Haru_version1ClientMetadata.Methods.updateArticle,
@@ -1436,6 +1435,7 @@ internal enum Haru_version1ClientMetadata {
       Haru_version1ClientMetadata.Methods.createLike,
       Haru_version1ClientMetadata.Methods.updateLike,
       Haru_version1ClientMetadata.Methods.getCount,
+      Haru_version1ClientMetadata.Methods.getPlaceKaKao,
     ]
   )
 
@@ -1530,12 +1530,6 @@ internal enum Haru_version1ClientMetadata {
       type: GRPCCallType.unary
     )
 
-    internal static let getDataPlace = GRPCMethodDescriptor(
-      name: "GetDataPlace",
-      path: "/haru.version1/GetDataPlace",
-      type: GRPCCallType.unary
-    )
-
     internal static let getFilterdArticles = GRPCMethodDescriptor(
       name: "GetFilterdArticles",
       path: "/haru.version1/GetFilterdArticles",
@@ -1577,6 +1571,12 @@ internal enum Haru_version1ClientMetadata {
       path: "/haru.version1/GetCount",
       type: GRPCCallType.unary
     )
+
+    internal static let getPlaceKaKao = GRPCMethodDescriptor(
+      name: "GetPlaceKaKao",
+      path: "/haru.version1/GetPlaceKaKao",
+      type: GRPCCallType.unary
+    )
   }
 }
 
@@ -1616,8 +1616,6 @@ internal protocol Haru_version1Provider: CallHandlerProvider {
 
   func addChatMessage(request: Haru_ChatMessageRequest, context: StatusOnlyCallContext) -> EventLoopFuture<Haru_ChatReply>
 
-  func getDataPlace(request: Haru_DataPlaceRequest, context: StatusOnlyCallContext) -> EventLoopFuture<Haru_DataPlaceReply>
-
   func getFilterdArticles(request: Haru_FilterdArticlesRequest, context: StatusOnlyCallContext) -> EventLoopFuture<Haru_FilterdArticlesReply>
 
   func createArticle(request: Haru_ArticleRequest, context: StatusOnlyCallContext) -> EventLoopFuture<Haru_ArticleReply>
@@ -1631,6 +1629,8 @@ internal protocol Haru_version1Provider: CallHandlerProvider {
   func updateLike(request: Haru_LikeRequest, context: StatusOnlyCallContext) -> EventLoopFuture<Haru_LikeReply>
 
   func getCount(request: Haru_Count, context: StatusOnlyCallContext) -> EventLoopFuture<Haru_Count>
+
+  func getPlaceKaKao(request: Haru_PlaceKakaoRequest, context: StatusOnlyCallContext) -> EventLoopFuture<Haru_PlaceKakaoReply>
 }
 
 extension Haru_version1Provider {
@@ -1780,15 +1780,6 @@ extension Haru_version1Provider {
         userFunction: self.addChatMessage(request:context:)
       )
 
-    case "GetDataPlace":
-      return UnaryServerHandler(
-        context: context,
-        requestDeserializer: ProtobufDeserializer<Haru_DataPlaceRequest>(),
-        responseSerializer: ProtobufSerializer<Haru_DataPlaceReply>(),
-        interceptors: self.interceptors?.makeGetDataPlaceInterceptors() ?? [],
-        userFunction: self.getDataPlace(request:context:)
-      )
-
     case "GetFilterdArticles":
       return UnaryServerHandler(
         context: context,
@@ -1850,6 +1841,15 @@ extension Haru_version1Provider {
         responseSerializer: ProtobufSerializer<Haru_Count>(),
         interceptors: self.interceptors?.makeGetCountInterceptors() ?? [],
         userFunction: self.getCount(request:context:)
+      )
+
+    case "GetPlaceKaKao":
+      return UnaryServerHandler(
+        context: context,
+        requestDeserializer: ProtobufDeserializer<Haru_PlaceKakaoRequest>(),
+        responseSerializer: ProtobufSerializer<Haru_PlaceKakaoReply>(),
+        interceptors: self.interceptors?.makeGetPlaceKaKaoInterceptors() ?? [],
+        userFunction: self.getPlaceKaKao(request:context:)
       )
 
     default:
@@ -1943,11 +1943,6 @@ internal protocol Haru_version1AsyncProvider: CallHandlerProvider {
     context: GRPCAsyncServerCallContext
   ) async throws -> Haru_ChatReply
 
-  @Sendable func getDataPlace(
-    request: Haru_DataPlaceRequest,
-    context: GRPCAsyncServerCallContext
-  ) async throws -> Haru_DataPlaceReply
-
   @Sendable func getFilterdArticles(
     request: Haru_FilterdArticlesRequest,
     context: GRPCAsyncServerCallContext
@@ -1982,6 +1977,11 @@ internal protocol Haru_version1AsyncProvider: CallHandlerProvider {
     request: Haru_Count,
     context: GRPCAsyncServerCallContext
   ) async throws -> Haru_Count
+
+  @Sendable func getPlaceKaKao(
+    request: Haru_PlaceKakaoRequest,
+    context: GRPCAsyncServerCallContext
+  ) async throws -> Haru_PlaceKakaoReply
 }
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
@@ -2138,15 +2138,6 @@ extension Haru_version1AsyncProvider {
         wrapping: self.addChatMessage(request:context:)
       )
 
-    case "GetDataPlace":
-      return GRPCAsyncServerHandler(
-        context: context,
-        requestDeserializer: ProtobufDeserializer<Haru_DataPlaceRequest>(),
-        responseSerializer: ProtobufSerializer<Haru_DataPlaceReply>(),
-        interceptors: self.interceptors?.makeGetDataPlaceInterceptors() ?? [],
-        wrapping: self.getDataPlace(request:context:)
-      )
-
     case "GetFilterdArticles":
       return GRPCAsyncServerHandler(
         context: context,
@@ -2208,6 +2199,15 @@ extension Haru_version1AsyncProvider {
         responseSerializer: ProtobufSerializer<Haru_Count>(),
         interceptors: self.interceptors?.makeGetCountInterceptors() ?? [],
         wrapping: self.getCount(request:context:)
+      )
+
+    case "GetPlaceKaKao":
+      return GRPCAsyncServerHandler(
+        context: context,
+        requestDeserializer: ProtobufDeserializer<Haru_PlaceKakaoRequest>(),
+        responseSerializer: ProtobufSerializer<Haru_PlaceKakaoReply>(),
+        interceptors: self.interceptors?.makeGetPlaceKaKaoInterceptors() ?? [],
+        wrapping: self.getPlaceKaKao(request:context:)
       )
 
     default:
@@ -2280,10 +2280,6 @@ internal protocol Haru_version1ServerInterceptorFactoryProtocol {
   ///   Defaults to calling `self.makeInterceptors()`.
   func makeAddChatMessageInterceptors() -> [ServerInterceptor<Haru_ChatMessageRequest, Haru_ChatReply>]
 
-  /// - Returns: Interceptors to use when handling 'getDataPlace'.
-  ///   Defaults to calling `self.makeInterceptors()`.
-  func makeGetDataPlaceInterceptors() -> [ServerInterceptor<Haru_DataPlaceRequest, Haru_DataPlaceReply>]
-
   /// - Returns: Interceptors to use when handling 'getFilterdArticles'.
   ///   Defaults to calling `self.makeInterceptors()`.
   func makeGetFilterdArticlesInterceptors() -> [ServerInterceptor<Haru_FilterdArticlesRequest, Haru_FilterdArticlesReply>]
@@ -2311,6 +2307,10 @@ internal protocol Haru_version1ServerInterceptorFactoryProtocol {
   /// - Returns: Interceptors to use when handling 'getCount'.
   ///   Defaults to calling `self.makeInterceptors()`.
   func makeGetCountInterceptors() -> [ServerInterceptor<Haru_Count, Haru_Count>]
+
+  /// - Returns: Interceptors to use when handling 'getPlaceKaKao'.
+  ///   Defaults to calling `self.makeInterceptors()`.
+  func makeGetPlaceKaKaoInterceptors() -> [ServerInterceptor<Haru_PlaceKakaoRequest, Haru_PlaceKakaoReply>]
 }
 
 internal enum Haru_version1ServerMetadata {
@@ -2333,7 +2333,6 @@ internal enum Haru_version1ServerMetadata {
       Haru_version1ServerMetadata.Methods.updateJoin,
       Haru_version1ServerMetadata.Methods.getChat,
       Haru_version1ServerMetadata.Methods.addChatMessage,
-      Haru_version1ServerMetadata.Methods.getDataPlace,
       Haru_version1ServerMetadata.Methods.getFilterdArticles,
       Haru_version1ServerMetadata.Methods.createArticle,
       Haru_version1ServerMetadata.Methods.updateArticle,
@@ -2341,6 +2340,7 @@ internal enum Haru_version1ServerMetadata {
       Haru_version1ServerMetadata.Methods.createLike,
       Haru_version1ServerMetadata.Methods.updateLike,
       Haru_version1ServerMetadata.Methods.getCount,
+      Haru_version1ServerMetadata.Methods.getPlaceKaKao,
     ]
   )
 
@@ -2435,12 +2435,6 @@ internal enum Haru_version1ServerMetadata {
       type: GRPCCallType.unary
     )
 
-    internal static let getDataPlace = GRPCMethodDescriptor(
-      name: "GetDataPlace",
-      path: "/haru.version1/GetDataPlace",
-      type: GRPCCallType.unary
-    )
-
     internal static let getFilterdArticles = GRPCMethodDescriptor(
       name: "GetFilterdArticles",
       path: "/haru.version1/GetFilterdArticles",
@@ -2480,6 +2474,12 @@ internal enum Haru_version1ServerMetadata {
     internal static let getCount = GRPCMethodDescriptor(
       name: "GetCount",
       path: "/haru.version1/GetCount",
+      type: GRPCCallType.unary
+    )
+
+    internal static let getPlaceKaKao = GRPCMethodDescriptor(
+      name: "GetPlaceKaKao",
+      path: "/haru.version1/GetPlaceKaKao",
       type: GRPCCallType.unary
     )
   }

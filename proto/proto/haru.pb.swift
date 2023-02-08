@@ -338,7 +338,7 @@ struct Haru_FilterdArticlesRequest {
 
   var category: Int64 = 0
 
-  /// 0 article 1 re_article
+  /// 0 article 1 re_article 2 account_article
   var type: Int64 = 0
 
   var articleID: Int64 = 0
@@ -680,6 +680,15 @@ struct Haru_Game {
     set {_uniqueStorage()._placeID = newValue}
   }
 
+  var placeKakao: Haru_PlaceKakao {
+    get {return _storage._placeKakao ?? Haru_PlaceKakao()}
+    set {_uniqueStorage()._placeKakao = newValue}
+  }
+  /// Returns true if `placeKakao` has been explicitly set.
+  var hasPlaceKakao: Bool {return _storage._placeKakao != nil}
+  /// Clears the value of `placeKakao`. Subsequent reads from it will return its default value.
+  mutating func clearPlaceKakao() {_uniqueStorage()._placeKakao = nil}
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -839,30 +848,101 @@ struct Haru_FilterdGamesReply {
   init() {}
 }
 
-struct Haru_DataPlaceRequest {
+struct Haru_PlaceKakaoRequest {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var version: Int64 = 0
+  var query: String = String()
+
+  var categoryGroupCode: String = String()
+
+  var x: String = String()
+
+  var y: String = String()
+
+  var radius: String = String()
+
+  var rect: String = String()
+
+  var size: String = String()
+
+  var sort: String = String()
+
+  var page: String = String()
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
 }
 
-struct Haru_DataPlaceReply {
+struct Haru_PlaceKakaoReply {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var version: Int64 = 0
+  var documents: [Haru_PlaceKakao] = []
 
-  var time: Int64 = 0
+  var meta: Haru_PlaceKakaoMeta {
+    get {return _meta ?? Haru_PlaceKakaoMeta()}
+    set {_meta = newValue}
+  }
+  /// Returns true if `meta` has been explicitly set.
+  var hasMeta: Bool {return self._meta != nil}
+  /// Clears the value of `meta`. Subsequent reads from it will return its default value.
+  mutating func clearMeta() {self._meta = nil}
 
-  var names: [String] = []
+  var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  var address: [String] = []
+  init() {}
+
+  fileprivate var _meta: Haru_PlaceKakaoMeta? = nil
+}
+
+struct Haru_PlaceKakao {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var addressName: String = String()
+
+  var categoryGroupCode: String = String()
+
+  var categoryGroupName: String = String()
+
+  var categoryName: String = String()
+
+  var distance: String = String()
+
+  var id: String = String()
+
+  var phone: String = String()
+
+  var placeName: String = String()
+
+  var placeURL: String = String()
+
+  var roadAddressName: String = String()
+
+  var x: String = String()
+
+  var y: String = String()
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+struct Haru_PlaceKakaoMeta {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var region: [String] = []
+
+  var keyword: String = String()
+
+  var selectedRegion: String = String()
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -904,8 +984,10 @@ extension Haru_GameReply: @unchecked Sendable {}
 extension Haru_FilterdGamesRequest: @unchecked Sendable {}
 extension Haru_GameFilter: @unchecked Sendable {}
 extension Haru_FilterdGamesReply: @unchecked Sendable {}
-extension Haru_DataPlaceRequest: @unchecked Sendable {}
-extension Haru_DataPlaceReply: @unchecked Sendable {}
+extension Haru_PlaceKakaoRequest: @unchecked Sendable {}
+extension Haru_PlaceKakaoReply: @unchecked Sendable {}
+extension Haru_PlaceKakao: @unchecked Sendable {}
+extension Haru_PlaceKakaoMeta: @unchecked Sendable {}
 #endif  // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -2143,6 +2225,7 @@ extension Haru_Game: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementation
     20: .standard(proto: "place_name"),
     21: .standard(proto: "place_address"),
     22: .standard(proto: "place_id"),
+    23: .standard(proto: "place_kakao"),
   ]
 
   fileprivate class _StorageClass {
@@ -2168,6 +2251,7 @@ extension Haru_Game: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementation
     var _placeName: String = String()
     var _placeAddress: String = String()
     var _placeID: String = String()
+    var _placeKakao: Haru_PlaceKakao? = nil
 
     static let defaultInstance = _StorageClass()
 
@@ -2196,6 +2280,7 @@ extension Haru_Game: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementation
       _placeName = source._placeName
       _placeAddress = source._placeAddress
       _placeID = source._placeID
+      _placeKakao = source._placeKakao
     }
   }
 
@@ -2236,6 +2321,7 @@ extension Haru_Game: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementation
         case 20: try { try decoder.decodeSingularStringField(value: &_storage._placeName) }()
         case 21: try { try decoder.decodeSingularStringField(value: &_storage._placeAddress) }()
         case 22: try { try decoder.decodeSingularStringField(value: &_storage._placeID) }()
+        case 23: try { try decoder.decodeSingularMessageField(value: &_storage._placeKakao) }()
         default: break
         }
       }
@@ -2314,6 +2400,9 @@ extension Haru_Game: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementation
       if !_storage._placeID.isEmpty {
         try visitor.visitSingularStringField(value: _storage._placeID, fieldNumber: 22)
       }
+      try { if let v = _storage._placeKakao {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 23)
+      } }()
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -2345,6 +2434,7 @@ extension Haru_Game: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementation
         if _storage._placeName != rhs_storage._placeName {return false}
         if _storage._placeAddress != rhs_storage._placeAddress {return false}
         if _storage._placeID != rhs_storage._placeID {return false}
+        if _storage._placeKakao != rhs_storage._placeKakao {return false}
         return true
       }
       if !storagesAreEqual {return false}
@@ -2684,10 +2774,18 @@ extension Haru_FilterdGamesReply: SwiftProtobuf.Message, SwiftProtobuf._MessageI
   }
 }
 
-extension Haru_DataPlaceRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".DataPlaceRequest"
+extension Haru_PlaceKakaoRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".PlaceKakaoRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "version"),
+    1: .same(proto: "query"),
+    2: .standard(proto: "category_group_code"),
+    3: .same(proto: "x"),
+    4: .same(proto: "y"),
+    5: .same(proto: "radius"),
+    6: .same(proto: "rect"),
+    7: .same(proto: "size"),
+    8: .same(proto: "sort"),
+    9: .same(proto: "page"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2696,33 +2794,71 @@ extension Haru_DataPlaceRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageIm
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularInt64Field(value: &self.version) }()
+      case 1: try { try decoder.decodeSingularStringField(value: &self.query) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.categoryGroupCode) }()
+      case 3: try { try decoder.decodeSingularStringField(value: &self.x) }()
+      case 4: try { try decoder.decodeSingularStringField(value: &self.y) }()
+      case 5: try { try decoder.decodeSingularStringField(value: &self.radius) }()
+      case 6: try { try decoder.decodeSingularStringField(value: &self.rect) }()
+      case 7: try { try decoder.decodeSingularStringField(value: &self.size) }()
+      case 8: try { try decoder.decodeSingularStringField(value: &self.sort) }()
+      case 9: try { try decoder.decodeSingularStringField(value: &self.page) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if self.version != 0 {
-      try visitor.visitSingularInt64Field(value: self.version, fieldNumber: 1)
+    if !self.query.isEmpty {
+      try visitor.visitSingularStringField(value: self.query, fieldNumber: 1)
+    }
+    if !self.categoryGroupCode.isEmpty {
+      try visitor.visitSingularStringField(value: self.categoryGroupCode, fieldNumber: 2)
+    }
+    if !self.x.isEmpty {
+      try visitor.visitSingularStringField(value: self.x, fieldNumber: 3)
+    }
+    if !self.y.isEmpty {
+      try visitor.visitSingularStringField(value: self.y, fieldNumber: 4)
+    }
+    if !self.radius.isEmpty {
+      try visitor.visitSingularStringField(value: self.radius, fieldNumber: 5)
+    }
+    if !self.rect.isEmpty {
+      try visitor.visitSingularStringField(value: self.rect, fieldNumber: 6)
+    }
+    if !self.size.isEmpty {
+      try visitor.visitSingularStringField(value: self.size, fieldNumber: 7)
+    }
+    if !self.sort.isEmpty {
+      try visitor.visitSingularStringField(value: self.sort, fieldNumber: 8)
+    }
+    if !self.page.isEmpty {
+      try visitor.visitSingularStringField(value: self.page, fieldNumber: 9)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Haru_DataPlaceRequest, rhs: Haru_DataPlaceRequest) -> Bool {
-    if lhs.version != rhs.version {return false}
+  static func ==(lhs: Haru_PlaceKakaoRequest, rhs: Haru_PlaceKakaoRequest) -> Bool {
+    if lhs.query != rhs.query {return false}
+    if lhs.categoryGroupCode != rhs.categoryGroupCode {return false}
+    if lhs.x != rhs.x {return false}
+    if lhs.y != rhs.y {return false}
+    if lhs.radius != rhs.radius {return false}
+    if lhs.rect != rhs.rect {return false}
+    if lhs.size != rhs.size {return false}
+    if lhs.sort != rhs.sort {return false}
+    if lhs.page != rhs.page {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-extension Haru_DataPlaceReply: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".DataPlaceReply"
+extension Haru_PlaceKakaoReply: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".PlaceKakaoReply"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "version"),
-    2: .same(proto: "time"),
-    3: .same(proto: "names"),
-    4: .same(proto: "address"),
+    1: .same(proto: "documents"),
+    2: .same(proto: "meta"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2731,36 +2867,172 @@ extension Haru_DataPlaceReply: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularInt64Field(value: &self.version) }()
-      case 2: try { try decoder.decodeSingularInt64Field(value: &self.time) }()
-      case 3: try { try decoder.decodeRepeatedStringField(value: &self.names) }()
-      case 4: try { try decoder.decodeRepeatedStringField(value: &self.address) }()
+      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.documents) }()
+      case 2: try { try decoder.decodeSingularMessageField(value: &self._meta) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if self.version != 0 {
-      try visitor.visitSingularInt64Field(value: self.version, fieldNumber: 1)
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    if !self.documents.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.documents, fieldNumber: 1)
     }
-    if self.time != 0 {
-      try visitor.visitSingularInt64Field(value: self.time, fieldNumber: 2)
+    try { if let v = self._meta {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Haru_PlaceKakaoReply, rhs: Haru_PlaceKakaoReply) -> Bool {
+    if lhs.documents != rhs.documents {return false}
+    if lhs._meta != rhs._meta {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Haru_PlaceKakao: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".PlaceKakao"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "address_name"),
+    2: .standard(proto: "category_group_code"),
+    3: .standard(proto: "category_group_name"),
+    4: .standard(proto: "category_name"),
+    5: .same(proto: "distance"),
+    6: .same(proto: "id"),
+    7: .same(proto: "phone"),
+    8: .standard(proto: "place_name"),
+    9: .standard(proto: "place_url"),
+    10: .standard(proto: "road_address_name"),
+    11: .same(proto: "x"),
+    12: .same(proto: "y"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self.addressName) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.categoryGroupCode) }()
+      case 3: try { try decoder.decodeSingularStringField(value: &self.categoryGroupName) }()
+      case 4: try { try decoder.decodeSingularStringField(value: &self.categoryName) }()
+      case 5: try { try decoder.decodeSingularStringField(value: &self.distance) }()
+      case 6: try { try decoder.decodeSingularStringField(value: &self.id) }()
+      case 7: try { try decoder.decodeSingularStringField(value: &self.phone) }()
+      case 8: try { try decoder.decodeSingularStringField(value: &self.placeName) }()
+      case 9: try { try decoder.decodeSingularStringField(value: &self.placeURL) }()
+      case 10: try { try decoder.decodeSingularStringField(value: &self.roadAddressName) }()
+      case 11: try { try decoder.decodeSingularStringField(value: &self.x) }()
+      case 12: try { try decoder.decodeSingularStringField(value: &self.y) }()
+      default: break
+      }
     }
-    if !self.names.isEmpty {
-      try visitor.visitRepeatedStringField(value: self.names, fieldNumber: 3)
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.addressName.isEmpty {
+      try visitor.visitSingularStringField(value: self.addressName, fieldNumber: 1)
     }
-    if !self.address.isEmpty {
-      try visitor.visitRepeatedStringField(value: self.address, fieldNumber: 4)
+    if !self.categoryGroupCode.isEmpty {
+      try visitor.visitSingularStringField(value: self.categoryGroupCode, fieldNumber: 2)
+    }
+    if !self.categoryGroupName.isEmpty {
+      try visitor.visitSingularStringField(value: self.categoryGroupName, fieldNumber: 3)
+    }
+    if !self.categoryName.isEmpty {
+      try visitor.visitSingularStringField(value: self.categoryName, fieldNumber: 4)
+    }
+    if !self.distance.isEmpty {
+      try visitor.visitSingularStringField(value: self.distance, fieldNumber: 5)
+    }
+    if !self.id.isEmpty {
+      try visitor.visitSingularStringField(value: self.id, fieldNumber: 6)
+    }
+    if !self.phone.isEmpty {
+      try visitor.visitSingularStringField(value: self.phone, fieldNumber: 7)
+    }
+    if !self.placeName.isEmpty {
+      try visitor.visitSingularStringField(value: self.placeName, fieldNumber: 8)
+    }
+    if !self.placeURL.isEmpty {
+      try visitor.visitSingularStringField(value: self.placeURL, fieldNumber: 9)
+    }
+    if !self.roadAddressName.isEmpty {
+      try visitor.visitSingularStringField(value: self.roadAddressName, fieldNumber: 10)
+    }
+    if !self.x.isEmpty {
+      try visitor.visitSingularStringField(value: self.x, fieldNumber: 11)
+    }
+    if !self.y.isEmpty {
+      try visitor.visitSingularStringField(value: self.y, fieldNumber: 12)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Haru_DataPlaceReply, rhs: Haru_DataPlaceReply) -> Bool {
-    if lhs.version != rhs.version {return false}
-    if lhs.time != rhs.time {return false}
-    if lhs.names != rhs.names {return false}
-    if lhs.address != rhs.address {return false}
+  static func ==(lhs: Haru_PlaceKakao, rhs: Haru_PlaceKakao) -> Bool {
+    if lhs.addressName != rhs.addressName {return false}
+    if lhs.categoryGroupCode != rhs.categoryGroupCode {return false}
+    if lhs.categoryGroupName != rhs.categoryGroupName {return false}
+    if lhs.categoryName != rhs.categoryName {return false}
+    if lhs.distance != rhs.distance {return false}
+    if lhs.id != rhs.id {return false}
+    if lhs.phone != rhs.phone {return false}
+    if lhs.placeName != rhs.placeName {return false}
+    if lhs.placeURL != rhs.placeURL {return false}
+    if lhs.roadAddressName != rhs.roadAddressName {return false}
+    if lhs.x != rhs.x {return false}
+    if lhs.y != rhs.y {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Haru_PlaceKakaoMeta: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".PlaceKakaoMeta"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "region"),
+    2: .same(proto: "keyword"),
+    3: .standard(proto: "selected_region"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeRepeatedStringField(value: &self.region) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.keyword) }()
+      case 3: try { try decoder.decodeSingularStringField(value: &self.selectedRegion) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.region.isEmpty {
+      try visitor.visitRepeatedStringField(value: self.region, fieldNumber: 1)
+    }
+    if !self.keyword.isEmpty {
+      try visitor.visitSingularStringField(value: self.keyword, fieldNumber: 2)
+    }
+    if !self.selectedRegion.isEmpty {
+      try visitor.visitSingularStringField(value: self.selectedRegion, fieldNumber: 3)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Haru_PlaceKakaoMeta, rhs: Haru_PlaceKakaoMeta) -> Bool {
+    if lhs.region != rhs.region {return false}
+    if lhs.keyword != rhs.keyword {return false}
+    if lhs.selectedRegion != rhs.selectedRegion {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

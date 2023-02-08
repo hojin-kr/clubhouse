@@ -38,7 +38,6 @@ service version1 {
   rpc UpdateJoin (JoinRequest) returns (JoinReply) {}
   rpc GetChat (ChatRequest) returns (ChatReply) {}
   rpc AddChatMessage (ChatMessageRequest) returns (ChatReply) {}
-  rpc GetDataPlace (DataPlaceRequest) returns (DataPlaceReply) {}
   rpc GetFilterdArticles (FilterdArticlesRequest) returns (FilterdArticlesReply) {}
   rpc CreateArticle (ArticleRequest) returns (ArticleReply) {}
   rpc UpdateArticle (ArticleRequest) returns (ArticleReply) {}
@@ -46,6 +45,7 @@ service version1 {
   rpc CreateLike (LikeRequest) returns (LikeReply) {}
   rpc UpdateLike (LikeRequest) returns (LikeReply) {}
   rpc GetCount (Count) returns (Count) {}
+  rpc GetPlaceKaKao (PlaceKakaoRequest) returns (PlaceKakaoReply) {}
 }
 
 message Account {
@@ -234,6 +234,7 @@ message Game {
   string place_name = 20;
   string place_address = 21;
   string place_id = 22;
+  PlaceKakao place_kakao = 23;
 }
 
 message Place {
@@ -279,13 +280,40 @@ message FilterdGamesReply {
   string cursor = 2;
 }
 
-message DataPlaceRequest {
-  int64 version = 1;
+message PlaceKakaoRequest {
+  string query = 1;
+  string category_group_code = 2;
+  string x = 3;
+  string y = 4;
+  string radius = 5;
+  string rect = 6;
+  string size = 7;
+  string sort = 8;
+  string page = 9;
 }
 
-message DataPlaceReply {
-  int64 version = 1;
-  int64 time = 2;
-  repeated string names = 3;
-  repeated string address = 4;
+message PlaceKakaoReply {
+  repeated PlaceKakao documents = 1;
+  PlaceKakaoMeta meta = 2;
+}
+
+message PlaceKakao {
+  string address_name = 1;
+  string category_group_code = 2;
+  string category_group_name = 3;
+  string category_name = 4;
+  string distance = 5;
+  string id = 6;
+  string phone = 7;
+  string place_name = 8;
+  string place_url = 9;
+  string road_address_name = 10;
+  string x = 11;
+  string y = 12;
+}
+
+message PlaceKakaoMeta {
+  repeated string region = 1;
+  string keyword = 2;
+  string selected_region = 3;
 }

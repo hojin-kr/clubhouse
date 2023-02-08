@@ -393,10 +393,10 @@ func (s *server) AddChatMessage(ctx context.Context, in *pb.ChatMessageRequest) 
 	return ret, nil
 }
 
-func (s *server) GetDataPlace(ctx context.Context, in *pb.DataPlaceRequest) (*pb.DataPlaceReply, error) {
+func (s *server) GetPlaceKaKao(ctx context.Context, in *pb.PlaceKakaoRequest) (*pb.PlaceKakaoReply, error) {
 	tracer.Trace(time.Now().UTC(), in)
-	names, address, dataTime, serverPlaceVersion := data.Get(in.Version)
-	ret := &pb.DataPlaceReply{Version: serverPlaceVersion, Names: names, Address: address, Time: dataTime}
+	data := data.QueryToKakaoPlace(in.Query, in.X, in.Y, in.Page)
+	ret := &pb.PlaceKakaoReply{Meta: data.Meta, Documents: data.Documents}
 	tracer.Trace(time.Now().UTC(), ret)
 	return ret, nil
 }

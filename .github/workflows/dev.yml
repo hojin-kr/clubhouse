@@ -71,6 +71,8 @@ jobs:
                   value : ${{ secrets.APPLE_APNS_KEY_ID }}
                 - name : APPLE_APNS_KEY
                   value : ${{ secrets.APPLE_APNS_KEY }}
+                - name : KAKAO_REST_API_KEY
+                  value : ${{ secrets.KAKAO_REST_API_KEY }}
                 resources:
                   limits:
                     cpu: 1000m
