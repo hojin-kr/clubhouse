@@ -150,7 +150,7 @@ func (s *server) GetFilterdGames(ctx context.Context, in *pb.FilterdGamesRequest
 	query := queryBase
 	for i := 0; i < len(in.Filter); i++ {
 		if in.Filter[i].Value != 0 {
-			if in.Filter[i].Key == "shortAddress" {
+			if in.Filter[i].Key == "ShortAddress" {
 				query = query.Filter(in.Filter[i].Key+" =", data.GetLocationTypeString(in.Filter[i].Value))
 			} else {
 				query = query.Filter(in.Filter[i].Key+" =", in.Filter[i].Value)
