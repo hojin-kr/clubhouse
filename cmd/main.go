@@ -136,7 +136,7 @@ func (s *server) GetFilterdGames(ctx context.Context, in *pb.FilterdGamesRequest
 	tracer.Trace(time.Now().UTC(), in)
 	client := ds.GetClient(ctx)
 	cursorStr := in.Cursor
-	const pageSize = 10
+	const pageSize = 100
 	var orderTypes = map[int64]string{
 		0: "Created",
 		1: "-Created",
@@ -189,7 +189,12 @@ func (s *server) GetFilterdGames(ctx context.Context, in *pb.FilterdGamesRequest
 	_ = err        // Check the error.
 	_ = nextCursor // Use nextCursor.String as the next page's token.
 	var _games []*pb.Game
+	now := time.Now().UTC().Unix()
 	for i := 0; i < len(games); i++ {
+		if now > games[i].Time {
+			// todo 모아서 del 요청
+			continue
+		}
 		_games = append(_games, &games[i])
 	}
 	ret := &pb.FilterdGamesReply{Games: _games, Cursor: nextCursor.String()}
@@ -318,7 +323,7 @@ func (s *server) GetGameJoins(ctx context.Context, in *pb.JoinRequest) (*pb.Join
 	tracer.Trace(time.Now().UTC(), in)
 	client := ds.GetClient(ctx)
 	cursorStr := in.Cursor
-	const pageSize = 10
+	const pageSize = 100
 	query := datastore.NewQuery("Join").Filter("GameId =", in.Join.GetGameId()).Filter("Status =", StatusJoinDefault).Order("Created").Limit(pageSize)
 	if cursorStr != "" {
 		cursor, err := datastore.DecodeCursor(cursorStr)
