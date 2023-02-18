@@ -12,7 +12,12 @@ import (
 
 var (
 	rest_api_key = os.Getenv("KAKAO_REST_API_KEY")
+	locations    = []string{"", "하남시"}
 )
+
+func GetLocationTypeString(index int64) string {
+	return locations[index]
+}
 
 func QueryToKakaoPlace(query string, x string, y string, page string) pb.PlaceKakaoReply {
 	params := url.Values{}

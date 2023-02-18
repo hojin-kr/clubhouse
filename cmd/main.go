@@ -149,7 +149,13 @@ func (s *server) GetFilterdGames(ctx context.Context, in *pb.FilterdGamesRequest
 	queryBase := datastore.NewQuery("GameList")
 	query := queryBase
 	for i := 0; i < len(in.Filter); i++ {
-		query = query.Filter(in.Filter[i].Key+" =", in.Filter[i].Value)
+		if in.Filter[i].Value != 0 {
+			if in.Filter[i].Key == "shortAddress" {
+				query = query.Filter(in.Filter[i].Key+" =", data.GetLocationTypeString(in.Filter[i].Value))
+			} else {
+				query = query.Filter(in.Filter[i].Key+" =", in.Filter[i].Value)
+			}
+		}
 	}
 	query = query.
 		Order(orderTypes[in.TypeOrder]).

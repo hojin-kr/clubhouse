@@ -177,3 +177,36 @@ indexes:
   - name: TypeScore
   - name: Price
     direction: desc
+
+- kind: GameList
+  properties:
+  - name: ShortAddress
+  - name: Created
+
+- kind: GameList
+  properties:
+  - name: ShortAddress
+  - name: Created
+    direction: desc
+
+- kind: GameList
+  properties:
+  - name: ShortAddress
+  - name: Time
+
+- kind: GameList
+  properties:
+  - name: ShortAddress
+  - name: Time
+    direction: desc
+
+- kind: GameList
+  properties:
+  - name: ShortAddress
+  - name: Price
+
+- kind: GameList
+  properties:
+  - name: ShortAddress
+  - name: Price
+    direction: desc
