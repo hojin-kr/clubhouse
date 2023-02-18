@@ -44,9 +44,10 @@ jobs:
         apiVersion: serving.knative.dev/v1
         kind: Service
         metadata:
-          name: clubhouse_dev
+          name: clubhouse-dev
           annotations:
             run.googleapis.com/ingress: all
+            autoscaling.knative.dev/maxScale: '10'
         spec:
           template:
             spec:
