@@ -4,9 +4,9 @@ name: Deploy to GCP CloudRun
 on:
   push:
     branches:
-      - dev
+      - main
 env:
-  APP_ENVIRONMENT: dev
+  APP_ENVIRONMENT: production
   SERVICE_NAME: clubhouse
 
 jobs:
@@ -44,7 +44,7 @@ jobs:
         apiVersion: serving.knative.dev/v1
         kind: Service
         metadata:
-          name: clubhouse_dev
+          name: clubhouse_production
           annotations:
             run.googleapis.com/ingress: all
         spec:
