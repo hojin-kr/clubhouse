@@ -82,4 +82,4 @@ jobs:
                     memory: 512Mi
         EOF
         cat cloudrun.yaml
-        gcloud run services replace cloudrun.yaml --region=asia-northeast1
+        gcloud run services replace cloudrun.yaml --region=asia-northeast3

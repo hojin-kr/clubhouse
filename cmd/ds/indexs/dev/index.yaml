@@ -1,0 +1,212 @@
+
+indexes:
+# indexing
+# gcloud datastore indexes cleanup
+# gcloud datastore indexes create
+# gcloud datastore indexes describe
+# gcloud datastore indexes list
+- kind: devGameList
+  properties:
+  - name: TypePlay
+  - name: Created
+    direction: desc
+
+- kind: devGameList
+  properties:
+  - name: TypePlay
+  - name: Time
+
+- kind: devGameList
+  properties:
+  - name: TypePlay
+  - name: Time
+    direction: desc
+
+- kind: devGameList
+  properties:
+  - name: TypePlay
+  - name: Price
+
+- kind: devGameList
+  properties:
+  - name: TypePlay
+  - name: Price
+    direction: desc
+
+- kind: devGameList
+  properties:
+  - name: TypePlay
+    direction: desc
+  - name: Created
+    direction: desc
+
+- kind: devGameList
+  properties:
+  - name: TypePlay
+    direction: desc
+  - name: Time
+
+- kind: devGameList
+  properties:
+  - name: TypePlay
+    direction: desc
+  - name: Time
+    direction: desc
+
+- kind: devGameList
+  properties:
+  - name: TypePlay
+    direction: desc
+  - name: Price
+
+- kind: devGameList
+  properties:
+  - name: TypePlay
+    direction: desc
+  - name: Price
+    direction: desc
+
+- kind: devJoin
+  properties:
+  - name: AccountId
+  - name: Status
+  - name: Start
+
+- kind: devJoin
+  properties:
+  - name: GameId
+  - name: Status
+  - name: Created
+
+- kind: devChat
+  properties:
+  - name: GameId
+  - name: Created
+
+- kind: devChat
+  properties:
+  - name: ForeginId
+  - name: Created
+
+- kind: devArticle
+  properties:
+  - name: Category
+  - name: Type
+  - name: Created
+
+- kind: devArticle
+  properties:
+  - name: Category
+  - name: Type
+  - name: Created
+    direction: desc
+
+- kind: devArticle
+  properties:
+  - name: AccountId
+  - name: Created
+    direction: desc
+
+- kind: devGameList
+  properties:
+  - name: TypePlay
+  - name: Created
+
+- kind: devGameList
+  properties:
+  - name: Person
+  - name: Created
+
+- kind: devGameList
+  properties:
+  - name: Person
+  - name: Created
+    direction: desc
+
+- kind: devGameList
+  properties:
+  - name: Person
+  - name: Time
+
+- kind: devGameList
+  properties:
+  - name: Person
+  - name: Time
+    direction: desc
+
+- kind: devGameList
+  properties:
+  - name: Person
+  - name: Price
+
+- kind: devGameList
+  properties:
+  - name: Person
+  - name: Price
+    direction: desc
+
+- kind: devGameList
+  properties:
+  - name: TypeScore
+  - name: Created
+
+- kind: devGameList
+  properties:
+  - name: TypeScore
+  - name: Created
+    direction: desc
+
+- kind: devGameList
+  properties:
+  - name: TypeScore
+  - name: Time
+
+- kind: devGameList
+  properties:
+  - name: TypeScore
+  - name: Time
+    direction: desc
+
+- kind: devGameList
+  properties:
+  - name: TypeScore
+  - name: Price
+
+- kind: devGameList
+  properties:
+  - name: TypeScore
+  - name: Price
+    direction: desc
+
+- kind: devGameList
+  properties:
+  - name: ShortAddress
+  - name: Created
+
+- kind: devGameList
+  properties:
+  - name: ShortAddress
+  - name: Created
+    direction: desc
+
+- kind: devGameList
+  properties:
+  - name: ShortAddress
+  - name: Time
+
+- kind: devGameList
+  properties:
+  - name: ShortAddress
+  - name: Time
+    direction: desc
+
+- kind: devGameList
+  properties:
+  - name: ShortAddress
+  - name: Price
+
+- kind: devGameList
+  properties:
+  - name: ShortAddress
+  - name: Price
+    direction: desc

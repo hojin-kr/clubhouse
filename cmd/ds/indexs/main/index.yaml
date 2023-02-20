@@ -1,0 +1,193 @@
+
+indexes:
+# indexing
+# gcloud datastore indexes cleanup
+# gcloud datastore indexes create
+# gcloud datastore indexes describe
+# gcloud datastore indexes list
+- kind: productionGameList
+  properties:
+  - name: TypePlay
+  - name: Created
+    direction: desc
+
+- kind: productionGameList
+  properties:
+  - name: TypePlay
+  - name: Time
+
+- kind: productionGameList
+  properties:
+  - name: TypePlay
+  - name: Time
+    direction: desc
+
+- kind: productionGameList
+  properties:
+  - name: TypePlay
+  - name: Price
+
+- kind: productionGameList
+  properties:
+  - name: TypePlay
+  - name: Price
+    direction: desc
+
+- kind: productionGameList
+  properties:
+  - name: TypePlay
+    direction: desc
+  - name: Created
+    direction: desc
+
+- kind: productionGameList
+  properties:
+  - name: TypePlay
+    direction: desc
+  - name: Time
+
+- kind: productionGameList
+  properties:
+  - name: TypePlay
+    direction: desc
+  - name: Time
+    direction: desc
+
+- kind: productionGameList
+  properties:
+  - name: TypePlay
+    direction: desc
+  - name: Price
+
+- kind: productionGameList
+  properties:
+  - name: TypePlay
+    direction: desc
+  - name: Price
+    direction: desc
+
+- kind: productionJoin
+  properties:
+  - name: AccountId
+  - name: Status
+  - name: Start
+
+- kind: productionJoin
+  properties:
+  - name: GameId
+  - name: Status
+  - name: Created
+
+- kind: productionChat
+  properties:
+  - name: GameId
+  - name: Created
+
+- kind: productionChat
+  properties:
+  - name: ForeginId
+  - name: Created
+
+- kind: productionGameList
+  properties:
+  - name: TypePlay
+  - name: Created
+
+- kind: productionGameList
+  properties:
+  - name: Person
+  - name: Created
+
+- kind: productionGameList
+  properties:
+  - name: Person
+  - name: Created
+    direction: desc
+
+- kind: productionGameList
+  properties:
+  - name: Person
+  - name: Time
+
+- kind: productionGameList
+  properties:
+  - name: Person
+  - name: Time
+    direction: desc
+
+- kind: productionGameList
+  properties:
+  - name: Person
+  - name: Price
+
+- kind: productionGameList
+  properties:
+  - name: Person
+  - name: Price
+    direction: desc
+
+- kind: productionGameList
+  properties:
+  - name: TypeScore
+  - name: Created
+
+- kind: productionGameList
+  properties:
+  - name: TypeScore
+  - name: Created
+    direction: desc
+
+- kind: productionGameList
+  properties:
+  - name: TypeScore
+  - name: Time
+
+- kind: productionGameList
+  properties:
+  - name: TypeScore
+  - name: Time
+    direction: desc
+
+- kind: productionGameList
+  properties:
+  - name: TypeScore
+  - name: Price
+
+- kind: productionGameList
+  properties:
+  - name: TypeScore
+  - name: Price
+    direction: desc
+
+- kind: productionGameList
+  properties:
+  - name: ShortAddress
+  - name: Created
+
+- kind: productionGameList
+  properties:
+  - name: ShortAddress
+  - name: Created
+    direction: desc
+
+- kind: productionGameList
+  properties:
+  - name: ShortAddress
+  - name: Time
+
+- kind: productionGameList
+  properties:
+  - name: ShortAddress
+  - name: Time
+    direction: desc
+
+- kind: productionGameList
+  properties:
+  - name: ShortAddress
+  - name: Price
+
+- kind: productionGameList
+  properties:
+  - name: ShortAddress
+  - name: Price
+    direction: desc
