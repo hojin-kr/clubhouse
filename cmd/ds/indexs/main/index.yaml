@@ -191,3 +191,8 @@ indexes:
   - name: ShortAddress
   - name: Price
     direction: desc
+
+- kind: productionJoin
+  properties:
+  - name: GameId
+  - name: Created

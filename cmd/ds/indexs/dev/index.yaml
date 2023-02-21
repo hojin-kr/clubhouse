@@ -210,3 +210,8 @@ indexes:
   - name: ShortAddress
   - name: Price
     direction: desc
+
+- kind: devJoin
+  properties:
+  - name: GameId
+  - name: Created
