@@ -215,3 +215,8 @@ indexes:
   properties:
   - name: GameId
   - name: Created
+
+- kind: devJoin
+  properties:
+  - name: AccountId
+  - name: Start

@@ -196,3 +196,8 @@ indexes:
   properties:
   - name: GameId
   - name: Created
+
+- kind: productionJoin
+  properties:
+  - name: AccountId
+  - name: Start

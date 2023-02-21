@@ -16,8 +16,8 @@ spec:
         - name: h2c
           containerPort: 50051
         env:
-        - name: IS_PRODUCTION
-          value: ${IS_PRODUCTION}
+        - name: APP_ENVIRONMENT
+          value: ${APP_ENVIRONMENT}
         - name: PROJECT_ID
           value: ${PROJECT_ID}
         - name: APPLE_TEAM_ID
