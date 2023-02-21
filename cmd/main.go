@@ -243,7 +243,7 @@ func (s *server) GetMyJoins(ctx context.Context, in *pb.JoinRequest) (*pb.JoinRe
 	client := ds.GetClient(ctx)
 	cursorStr := in.Cursor
 	const pageSize = 100
-	query := datastore.NewQuery(getDatastoreKind("Join")).Filter("AccountId =", in.Join.GetAccountId()).Filter("Status <", StatusJoinCancel).Filter("Start >", time.Now().Unix()).Order("Start").Limit(pageSize)
+	query := datastore.NewQuery(getDatastoreKind("Join")).Filter("AccountId =", in.Join.GetAccountId()).Filter("Status =", StatusJoinDefault).Filter("Status =", StatusJoinAccept).Filter("Status =", StatusJoinReject).Filter("Start >", time.Now().Unix()).Order("Start").Limit(pageSize)
 	if cursorStr != "" {
 		cursor, err := datastore.DecodeCursor(cursorStr)
 		if err != nil {
@@ -328,7 +328,7 @@ func (s *server) GetGameJoins(ctx context.Context, in *pb.JoinRequest) (*pb.Join
 	client := ds.GetClient(ctx)
 	cursorStr := in.Cursor
 	const pageSize = 100
-	query := datastore.NewQuery(getDatastoreKind("Join")).Filter("GameId =", in.Join.GetGameId()).Filter("Status <", StatusJoinCancel).Order("Created").Limit(pageSize)
+	query := datastore.NewQuery(getDatastoreKind("Join")).Filter("GameId =", in.Join.GetGameId()).Filter("Status =", StatusJoinDefault).Filter("Status =", StatusJoinAccept).Filter("Status =", StatusJoinReject).Order("Created").Limit(pageSize)
 	if cursorStr != "" {
 		cursor, err := datastore.DecodeCursor(cursorStr)
 		if err != nil {
