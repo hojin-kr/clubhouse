@@ -8,6 +8,7 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	b64 "encoding/base64"
@@ -18,6 +19,7 @@ import (
 	ds "github.com/hojin-kr/clubhouse/cmd/ds"
 	pb "github.com/hojin-kr/clubhouse/cmd/proto"
 	"github.com/hojin-kr/clubhouse/cmd/trace"
+	cache "github.com/patrickmn/go-cache"
 	"google.golang.org/api/iterator"
 	"google.golang.org/grpc"
 )
@@ -31,6 +33,7 @@ var (
 	apple_apns_key_id = os.Getenv("APPLE_APNS_KEY_ID")
 	apple_apns_key    = os.Getenv("APPLE_APNS_KEY")
 	environment       = os.Getenv("APP_ENVIRONMENT")
+	c                 = cache.New(5*time.Minute, 10*time.Minute)
 )
 
 // server is used to implement UnimplementedServiceServer
@@ -60,7 +63,15 @@ func (s *server) CreateAccount(ctx context.Context, in *pb.AccountRequest) (*pb.
 func (s *server) GetProfile(ctx context.Context, in *pb.ProfileRequest) (*pb.ProfileReply, error) {
 	tracer.Trace(time.Now().UTC(), in)
 	key := datastore.IDKey(getDatastoreKind("Profile"), in.Profile.GetAccountId(), nil)
+	cacheKey := getCacheKeyOfDatastoreKey(*key)
+	if x, found := c.Get(cacheKey); found {
+		in.Profile = x.(*pb.Profile)
+		ret := &pb.ProfileReply{Profile: in.GetProfile()}
+		tracer.Trace(time.Now().UTC(), ret)
+		return ret, nil
+	}
 	ds.Get(ctx, key, in.Profile)
+	c.Set(cacheKey, in.Profile, cache.DefaultExpiration)
 	ret := &pb.ProfileReply{Profile: in.GetProfile()}
 	tracer.Trace(time.Now().UTC(), ret)
 	return ret, nil
@@ -73,7 +84,10 @@ func (s *server) UpdateProfile(ctx context.Context, in *pb.ProfileRequest) (*pb.
 		ret := &pb.ProfileReply{Profile: in.GetProfile()}
 		return ret, nil
 	}
-	ds.Put(ctx, datastore.IDKey(getDatastoreKind("Profile"), in.Profile.GetAccountId(), nil), in.Profile)
+	key := datastore.IDKey(getDatastoreKind("Profile"), in.Profile.GetAccountId(), nil)
+	ds.Put(ctx, key, in.Profile)
+	cacheKey := getCacheKeyOfDatastoreKey(*key)
+	c.Set(cacheKey, in.Profile, cache.DefaultExpiration)
 	ret := &pb.ProfileReply{Profile: in.GetProfile()}
 	tracer.Trace(time.Now().UTC(), ret)
 	return ret, nil
@@ -95,7 +109,15 @@ func (s *server) CreateGame(ctx context.Context, in *pb.GameRequest) (*pb.GameRe
 
 func (s *server) GetGame(ctx context.Context, in *pb.GameRequest) (*pb.GameReply, error) {
 	tracer.Trace(time.Now().UTC(), in)
-	ds.Get(ctx, datastore.IDKey(getDatastoreKind("Game"), in.Game.GetId(), nil), in.Game)
+	key := datastore.IDKey(getDatastoreKind("Game"), in.Game.GetId(), nil)
+	cacheKey := getCacheKeyOfDatastoreKey(*key)
+	if x, found := c.Get(cacheKey); found {
+		in.Game = x.(*pb.Game)
+		ret := &pb.GameReply{Game: in.GetGame()}
+		return ret, nil
+	}
+	ds.Get(ctx, key, in.Game)
+	c.Set(cacheKey, in.Game, cache.DefaultExpiration)
 	ret := &pb.GameReply{Game: in.GetGame()}
 	tracer.Trace(time.Now().UTC(), ret)
 	return ret, nil
@@ -104,12 +126,23 @@ func (s *server) GetGame(ctx context.Context, in *pb.GameRequest) (*pb.GameReply
 func (s *server) GetGameMulti(ctx context.Context, in *pb.GameMultiRequest) (*pb.GameMultiReply, error) {
 	tracer.Trace(time.Now().UTC(), in)
 	keys := []*datastore.Key{}
+	var cacheKey string
 	for i := 0; i < len(in.GameIds); i++ {
-		keys = append(keys, datastore.IDKey(getDatastoreKind("Game"), in.GameIds[i], nil))
+		key := datastore.IDKey(getDatastoreKind("Game"), in.GameIds[i], nil)
+		keys = append(keys, key)
+		cacheKey += getCacheKeyOfDatastoreKey(*key)
+	}
+	if x, found := c.Get(cacheKey); found {
+		games := make([]*pb.Game, len(in.GameIds))
+		games = x.([]*pb.Game)
+		ret := &pb.GameMultiReply{Games: games}
+		tracer.Trace(time.Now().UTC(), ret)
+		return ret, nil
 	}
 	keys = append(keys)
 	games := make([]*pb.Game, len(in.GameIds))
 	ds.GetMulti(ctx, keys, games)
+	c.Set(cacheKey, games, cache.DefaultExpiration)
 	ret := &pb.GameMultiReply{Games: games}
 	tracer.Trace(time.Now().UTC(), ret)
 	return ret, nil
@@ -121,11 +154,13 @@ func (s *server) UpdateGame(ctx context.Context, in *pb.GameRequest) (*pb.GameRe
 	// 조인을 수락했습니다. 거절했습니다로 노티
 	var gameBefore pb.Game
 	IDKey := datastore.IDKey(getDatastoreKind("Game"), in.Game.GetId(), nil)
+	cacheKey := getCacheKeyOfDatastoreKey(*IDKey)
 	ds.Get(ctx, IDKey, &gameBefore)
 	_ctx := context.Background()
 	go setJoinChangePush(_ctx, in, &gameBefore)
 	_ = ds.Put(ctx, IDKey, in.Game)
 	_ = ds.Put(ctx, datastore.IDKey(getDatastoreKind("GameList"), in.Game.GetId(), nil), in.Game)
+	c.Set(cacheKey, in.Game, cache.DefaultExpiration)
 	ret := &pb.GameReply{Game: in.GetGame()}
 	tracer.Trace(time.Now().UTC(), ret)
 	return ret, nil
@@ -134,6 +169,13 @@ func (s *server) UpdateGame(ctx context.Context, in *pb.GameRequest) (*pb.GameRe
 // filterdGames에서는 Game 목록만 반환하고 GetGame에서는 attend, place 부가 정보 반환
 func (s *server) GetFilterdGames(ctx context.Context, in *pb.FilterdGamesRequest) (*pb.FilterdGamesReply, error) {
 	tracer.Trace(time.Now().UTC(), in)
+	cacheKey := getCacheKeyOfDatastoreQueryGameFilter("GameList", in.Filter, in.TypeOrder, in.Cursor)
+	log.Print(cacheKey)
+	if x, found := c.Get(cacheKey); found {
+		_games := x.([]*pb.Game)
+		ret := &pb.FilterdGamesReply{Games: _games, Cursor: in.Cursor}
+		return ret, nil
+	}
 	client := ds.GetClient(ctx)
 	cursorStr := in.Cursor
 	const pageSize = 100
@@ -197,6 +239,7 @@ func (s *server) GetFilterdGames(ctx context.Context, in *pb.FilterdGamesRequest
 		}
 		_games = append(_games, &games[i])
 	}
+	c.Set(cacheKey, _games, cache.DefaultExpiration)
 	ret := &pb.FilterdGamesReply{Games: _games, Cursor: nextCursor.String()}
 	tracer.Trace(time.Now().UTC(), ret)
 	return ret, nil
@@ -240,6 +283,12 @@ const (
 func (s *server) GetMyJoins(ctx context.Context, in *pb.JoinRequest) (*pb.JoinReply, error) {
 	// 취소 제외 조인 목록 조회
 	tracer.Trace(time.Now().UTC(), in)
+	cacheKey := getCacheKeyOfDatastoreQuery("Join", in.Join.AccountId, "myJoins:"+in.Cursor)
+	if x, found := c.Get(cacheKey); found {
+		joins := x.([]*pb.Join)
+		ret := &pb.JoinReply{Joins: joins, Cursor: in.Cursor}
+		return ret, nil
+	}
 	client := ds.GetClient(ctx)
 	cursorStr := in.Cursor
 	const pageSize = 100
@@ -274,7 +323,7 @@ func (s *server) GetMyJoins(ctx context.Context, in *pb.JoinRequest) (*pb.JoinRe
 	for i := 0; i < len(joins); i++ {
 		_joins = append(_joins, &joins[i])
 	}
-
+	c.Set(cacheKey, _joins, cache.DefaultExpiration)
 	ret := &pb.JoinReply{Joins: _joins, Cursor: nextCursor.String()}
 	tracer.Trace(time.Now().UTC(), ret)
 	return ret, nil
@@ -283,6 +332,12 @@ func (s *server) GetMyJoins(ctx context.Context, in *pb.JoinRequest) (*pb.JoinRe
 func (s *server) GetMyBeforeJoins(ctx context.Context, in *pb.JoinRequest) (*pb.JoinReply, error) {
 	// 지난 Accept 조인 목록
 	tracer.Trace(time.Now().UTC(), in)
+	cacheKey := getCacheKeyOfDatastoreQuery("Join", in.Join.AccountId, "beforeJoins:"+in.Cursor)
+	if x, found := c.Get(cacheKey); found {
+		joins := x.([]*pb.Join)
+		ret := &pb.JoinReply{Joins: joins, Cursor: in.Cursor}
+		return ret, nil
+	}
 	client := ds.GetClient(ctx)
 	cursorStr := in.Cursor
 	const pageSize = 50
@@ -317,7 +372,7 @@ func (s *server) GetMyBeforeJoins(ctx context.Context, in *pb.JoinRequest) (*pb.
 	for i := 0; i < len(joins); i++ {
 		_joins = append(_joins, &joins[i])
 	}
-
+	c.Set(cacheKey, _joins, cache.DefaultExpiration)
 	ret := &pb.JoinReply{Joins: _joins, Cursor: nextCursor.String()}
 	tracer.Trace(time.Now().UTC(), ret)
 	return ret, nil
@@ -325,6 +380,12 @@ func (s *server) GetMyBeforeJoins(ctx context.Context, in *pb.JoinRequest) (*pb.
 
 func (s *server) GetGameJoins(ctx context.Context, in *pb.JoinRequest) (*pb.JoinReply, error) {
 	tracer.Trace(time.Now().UTC(), in)
+	cacheKey := getCacheKeyOfDatastoreQuery("Join", in.Join.AccountId, "gameJoins:"+in.Cursor)
+	if x, found := c.Get(cacheKey); found {
+		joins := x.([]*pb.Join)
+		ret := &pb.JoinReply{Joins: joins, Cursor: in.Cursor}
+		return ret, nil
+	}
 	client := ds.GetClient(ctx)
 	cursorStr := in.Cursor
 	const pageSize = 100
@@ -359,6 +420,7 @@ func (s *server) GetGameJoins(ctx context.Context, in *pb.JoinRequest) (*pb.Join
 	for i := 0; i < len(joins); i++ {
 		_joins = append(_joins, &joins[i])
 	}
+	c.Set(cacheKey, _joins, cache.DefaultExpiration)
 	ret := &pb.JoinReply{Joins: _joins, Cursor: nextCursor.String()}
 	tracer.Trace(time.Now().UTC(), ret)
 	return ret, nil
@@ -366,10 +428,18 @@ func (s *server) GetGameJoins(ctx context.Context, in *pb.JoinRequest) (*pb.Join
 
 func (s *server) GetChat(ctx context.Context, in *pb.ChatRequest) (*pb.ChatReply, error) {
 	tracer.Trace(time.Now().UTC(), in)
+	cacheKey := getCacheKeyOfDatastoreQuery("Chat", in.Chat.ForeginId, "")
+	if x, found := c.Get(cacheKey); found {
+		chats := x.([]*pb.Chat)
+		ret := &pb.ChatReply{Chats: chats, Cursor: ""}
+		tracer.Trace(time.Now().UTC(), ret)
+		return ret, nil
+	}
 	var chats []*pb.Chat
 	const pageSize = 100
 	q := datastore.NewQuery(getDatastoreKind("Chat")).Filter("ForeginId =", in.Chat.GetForeginId()).Order("Created").Limit(pageSize)
 	ds.GetAll(ctx, q, &chats)
+	c.Set(cacheKey, chats, cache.DefaultExpiration)
 	ret := &pb.ChatReply{Chats: chats, Cursor: ""}
 	tracer.Trace(time.Now().UTC(), ret)
 	return ret, nil
@@ -378,6 +448,7 @@ func (s *server) GetChat(ctx context.Context, in *pb.ChatRequest) (*pb.ChatReply
 // update my chat
 func (s *server) AddChatMessage(ctx context.Context, in *pb.ChatMessageRequest) (*pb.ChatReply, error) {
 	tracer.Trace(time.Now().UTC(), in)
+	cacheKey := getCacheKeyOfDatastoreQuery("Chat", in.ForeginId, "")
 	var Chat pb.Chat
 	// get
 	key := datastore.NameKey(getDatastoreKind("Chat"), strconv.FormatInt(in.GetForeginId()+in.GetAccountId(), 10), nil)
@@ -401,6 +472,7 @@ func (s *server) AddChatMessage(ctx context.Context, in *pb.ChatMessageRequest) 
 	q := datastore.NewQuery(getDatastoreKind("Chat")).Filter("ForeginId =", in.GetForeginId()).Order("Created").Limit(pageSize)
 	ds.GetAll(ctx, q, &chats)
 	log.Printf(strconv.FormatInt(in.GetForeginId(), 10))
+	c.Set(cacheKey, chats, cache.DefaultExpiration)
 	ret := &pb.ChatReply{Chats: chats}
 	_ctx := context.Background()
 	go setChatPush(_ctx, in.ForeginId, in.GetAccountId(), in.ChatMessage.Message)
@@ -526,6 +598,22 @@ func pushNotification(apnsTokens []string, title string, subtitle string, body s
 		}
 		print(resp.Timestamp)
 	}
+}
+
+func getCacheKeyOfDatastoreKey(dsKey datastore.Key) string {
+	return fmt.Sprintf("%s:%d", dsKey.Kind, dsKey.ID)
+}
+
+func getCacheKeyOfDatastoreQuery(dsKind string, dsKey int64, custom string) string {
+	return fmt.Sprintf("%s:%d:%s", dsKind, dsKey, custom)
+}
+
+func getCacheKeyOfDatastoreQueryGameFilter(dsKind string, filters []*pb.GameFilter, order int64, cursor string) string {
+	var keys []string
+	for i := 0; i < len(filters); i++ {
+		keys = append(keys, filters[i].Key)
+	}
+	return fmt.Sprintf("%s:%s:%d:%s", dsKind, strings.Join(keys, ":"), order, cursor)
 }
 
 func (s *server) CreateArticle(ctx context.Context, in *pb.ArticleRequest) (*pb.ArticleReply, error) {

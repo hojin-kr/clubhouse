@@ -1,7 +1,6 @@
 package trace
 
 import (
-	"fmt"
 	"io"
 )
 
@@ -23,8 +22,8 @@ type tracer struct {
 
 // Trace 메소드가 호출되면 추적 세부 사항을 형식화해서 out 출력기에 기록
 func (t *tracer) Trace(a ...interface{}) {
-	fmt.Fprint(t.out, a...)
-	fmt.Fprintln(t.out)
+	// fmt.Fprint(t.out, a...)
+	// fmt.Fprintln(t.out)
 }
 
 type nilTracer struct{}
