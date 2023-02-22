@@ -33,7 +33,7 @@ var (
 	apple_apns_key_id = os.Getenv("APPLE_APNS_KEY_ID")
 	apple_apns_key    = os.Getenv("APPLE_APNS_KEY")
 	environment       = os.Getenv("APP_ENVIRONMENT")
-	c                 = cache.New(5*time.Minute, 10*time.Minute)
+	c                 = cache.New(1*time.Minute, 10*time.Minute)
 )
 
 // server is used to implement UnimplementedServiceServer
