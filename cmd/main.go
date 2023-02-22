@@ -159,8 +159,6 @@ func (s *server) UpdateGame(ctx context.Context, in *pb.GameRequest) (*pb.GameRe
 	IDKey := datastore.IDKey(getDatastoreKind("Game"), in.Game.GetId(), nil)
 	cacheKey := getCacheKeyOfDatastoreKey(*IDKey)
 	ds.Get(ctx, IDKey, &gameBefore)
-	_ctx := context.Background()
-	go setJoinChangePush(_ctx, in, &gameBefore)
 	_ = ds.Put(ctx, IDKey, in.Game)
 	_ = ds.Put(ctx, datastore.IDKey(getDatastoreKind("GameList"), in.Game.GetId(), nil), in.Game)
 	c.Set(cacheKey, in.Game, cache.DefaultExpiration)
@@ -273,6 +271,11 @@ func (s *server) UpdateJoin(ctx context.Context, in *pb.JoinRequest) (*pb.JoinRe
 	in.Join.Updated = time.Now().Unix()
 	ds.Put(ctx, datastore.IDKey(getDatastoreKind("Join"), in.Join.GetJoinId(), nil), in.Join)
 	ret := &pb.JoinReply{Join: in.GetJoin()}
+	// del cache
+	c.Delete(getCacheKeyOfDatastoreQuery("Join", in.Join.AccountId, "myJoins"))
+	c.Delete(getCacheKeyOfDatastoreQuery("Join", in.Join.AccountId, "beforeJoins"))
+	c.Delete(getCacheKeyOfDatastoreQuery("Join", in.Join.GameId, "gameJoins:"))
+	// todo push noti
 	tracer.Trace(time.Now().UTC(), ret)
 	return ret, nil
 }
@@ -287,7 +290,7 @@ const (
 func (s *server) GetMyJoins(ctx context.Context, in *pb.JoinRequest) (*pb.JoinReply, error) {
 	// 취소 제외 조인 목록 조회
 	tracer.Trace(time.Now().UTC(), in)
-	cacheKey := getCacheKeyOfDatastoreQuery("Join", in.Join.AccountId, "myJoins:"+in.Cursor)
+	cacheKey := getCacheKeyOfDatastoreQuery("Join", in.Join.AccountId, "myJoins")
 	if x, found := c.Get(cacheKey); found {
 		joins := x.([]*pb.Join)
 		ret := &pb.JoinReply{Joins: joins, Cursor: in.Cursor}
@@ -337,7 +340,7 @@ func (s *server) GetMyJoins(ctx context.Context, in *pb.JoinRequest) (*pb.JoinRe
 func (s *server) GetMyBeforeJoins(ctx context.Context, in *pb.JoinRequest) (*pb.JoinReply, error) {
 	// 지난 Accept 조인 목록
 	tracer.Trace(time.Now().UTC(), in)
-	cacheKey := getCacheKeyOfDatastoreQuery("Join", in.Join.AccountId, "beforeJoins:"+in.Cursor)
+	cacheKey := getCacheKeyOfDatastoreQuery("Join", in.Join.AccountId, "beforeJoins")
 	if x, found := c.Get(cacheKey); found {
 		joins := x.([]*pb.Join)
 		ret := &pb.JoinReply{Joins: joins, Cursor: in.Cursor}
@@ -386,7 +389,7 @@ func (s *server) GetMyBeforeJoins(ctx context.Context, in *pb.JoinRequest) (*pb.
 
 func (s *server) GetGameJoins(ctx context.Context, in *pb.JoinRequest) (*pb.JoinReply, error) {
 	tracer.Trace(time.Now().UTC(), in)
-	cacheKey := getCacheKeyOfDatastoreQuery("Join", in.Join.AccountId, "gameJoins:"+in.Cursor)
+	cacheKey := getCacheKeyOfDatastoreQuery("Join", in.Join.GameId, "gameJoins:"+in.Cursor)
 	if x, found := c.Get(cacheKey); found {
 		joins := x.([]*pb.Join)
 		ret := &pb.JoinReply{Joins: joins, Cursor: in.Cursor}
@@ -497,11 +500,25 @@ func (s *server) GetPlaceKaKao(ctx context.Context, in *pb.PlaceKakaoRequest) (*
 }
 
 func setJoinRequestPush(ctx context.Context, in *pb.JoinRequest) {
-	var game pb.Game
-	var profile pb.Profile
+	var game *pb.Game
+	var profile *pb.Profile
 	var apnsTokens []string
-	ds.Get(ctx, datastore.IDKey(getDatastoreKind("Game"), in.Join.GetGameId(), nil), &game)
-	ds.Get(ctx, datastore.IDKey(getDatastoreKind("Profile"), game.GetHostAccountId(), nil), &profile)
+	dsKeyGame := datastore.IDKey(getDatastoreKind("Game"), in.Join.GetGameId(), nil)
+	cacheKey := getCacheKeyOfDatastoreKey(*dsKeyGame)
+	if x, found := c.Get(cacheKey); found {
+		game = x.(*pb.Game)
+		fmt.Printf(cacheKey)
+	} else {
+		ds.Get(ctx, dsKeyGame, game)
+	}
+	dsKeyProfile := datastore.IDKey(getDatastoreKind("Profile"), game.GetHostAccountId(), nil)
+	cacheKeyProfile := getCacheKeyOfDatastoreKey(*dsKeyProfile)
+	if x, found := c.Get(cacheKeyProfile); found {
+		profile = x.(*pb.Profile)
+		fmt.Printf(cacheKeyProfile)
+	} else {
+		ds.Get(ctx, dsKeyProfile, profile)
+	}
 	if game.GetHostAccountId() != in.Join.AccountId {
 		apnsTokens = append(apnsTokens, profile.ApnsToken)
 		pushNotification(apnsTokens, "클럽하우스", game.PlaceName, "조인 신청이 도착했습니다.")
@@ -536,9 +553,16 @@ func setJoinChangePush(ctx context.Context, in *pb.GameRequest, before *pb.Game)
 		changeStatus = "거절"
 	}
 	if changeStatus != "" {
-		var profile pb.Profile
+		var profile *pb.Profile
 		var apnsTokens []string
-		ds.Get(ctx, datastore.IDKey(getDatastoreKind("Profile"), accountID, nil), &profile)
+		dsKeyProfile := datastore.IDKey(getDatastoreKind("Profile"), accountID, nil)
+		cacheKeyProfile := getCacheKeyOfDatastoreKey(*dsKeyProfile)
+		if x, found := c.Get(cacheKeyProfile); found {
+			profile = x.(*pb.Profile)
+			fmt.Printf(cacheKeyProfile)
+		} else {
+			ds.Get(ctx, dsKeyProfile, profile)
+		}
 		apnsTokens = append(apnsTokens, profile.ApnsToken)
 		pushNotification(apnsTokens, "클럽하우스", in.Game.PlaceName, "조인 신청이 "+changeStatus+"됐습니다.")
 	}
@@ -552,9 +576,16 @@ func setChatPush(ctx context.Context, gameID int64, accountID int64, message str
 		var apnsTokens []string
 		game.AcceptAccountIds = append(game.AcceptAccountIds, game.HostAccountId)
 		for _, x := range game.AcceptAccountIds {
-			var profile pb.Profile
+			var profile *pb.Profile
 			if x != accountID {
-				ds.Get(ctx, datastore.IDKey(getDatastoreKind("Profile"), x, nil), &profile)
+				dsKeyProfile := datastore.IDKey(getDatastoreKind("Profile"), x, nil)
+				cacheKeyProfile := getCacheKeyOfDatastoreKey(*dsKeyProfile)
+				if x, found := c.Get(cacheKeyProfile); found {
+					profile = x.(*pb.Profile)
+					fmt.Printf(cacheKeyProfile)
+				} else {
+					ds.Get(ctx, dsKeyProfile, profile)
+				}
 				apnsTokens = append(apnsTokens, profile.ApnsToken)
 			}
 		}
