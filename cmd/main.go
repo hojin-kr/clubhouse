@@ -68,6 +68,7 @@ func (s *server) GetProfile(ctx context.Context, in *pb.ProfileRequest) (*pb.Pro
 		in.Profile = x.(*pb.Profile)
 		ret := &pb.ProfileReply{Profile: in.GetProfile()}
 		tracer.Trace(time.Now().UTC(), ret)
+		fmt.Printf(cacheKey)
 		return ret, nil
 	}
 	ds.Get(ctx, key, in.Profile)
@@ -114,6 +115,7 @@ func (s *server) GetGame(ctx context.Context, in *pb.GameRequest) (*pb.GameReply
 	if x, found := c.Get(cacheKey); found {
 		in.Game = x.(*pb.Game)
 		ret := &pb.GameReply{Game: in.GetGame()}
+		fmt.Printf(cacheKey)
 		return ret, nil
 	}
 	ds.Get(ctx, key, in.Game)
@@ -137,6 +139,7 @@ func (s *server) GetGameMulti(ctx context.Context, in *pb.GameMultiRequest) (*pb
 		games = x.([]*pb.Game)
 		ret := &pb.GameMultiReply{Games: games}
 		tracer.Trace(time.Now().UTC(), ret)
+		fmt.Printf(cacheKey)
 		return ret, nil
 	}
 	keys = append(keys)
@@ -174,6 +177,7 @@ func (s *server) GetFilterdGames(ctx context.Context, in *pb.FilterdGamesRequest
 	if x, found := c.Get(cacheKey); found {
 		_games := x.([]*pb.Game)
 		ret := &pb.FilterdGamesReply{Games: _games, Cursor: in.Cursor}
+		fmt.Printf(cacheKey)
 		return ret, nil
 	}
 	client := ds.GetClient(ctx)
@@ -287,6 +291,7 @@ func (s *server) GetMyJoins(ctx context.Context, in *pb.JoinRequest) (*pb.JoinRe
 	if x, found := c.Get(cacheKey); found {
 		joins := x.([]*pb.Join)
 		ret := &pb.JoinReply{Joins: joins, Cursor: in.Cursor}
+		fmt.Printf(cacheKey)
 		return ret, nil
 	}
 	client := ds.GetClient(ctx)
@@ -336,6 +341,7 @@ func (s *server) GetMyBeforeJoins(ctx context.Context, in *pb.JoinRequest) (*pb.
 	if x, found := c.Get(cacheKey); found {
 		joins := x.([]*pb.Join)
 		ret := &pb.JoinReply{Joins: joins, Cursor: in.Cursor}
+		fmt.Printf(cacheKey)
 		return ret, nil
 	}
 	client := ds.GetClient(ctx)
@@ -384,6 +390,7 @@ func (s *server) GetGameJoins(ctx context.Context, in *pb.JoinRequest) (*pb.Join
 	if x, found := c.Get(cacheKey); found {
 		joins := x.([]*pb.Join)
 		ret := &pb.JoinReply{Joins: joins, Cursor: in.Cursor}
+		fmt.Printf(cacheKey)
 		return ret, nil
 	}
 	client := ds.GetClient(ctx)
@@ -433,6 +440,7 @@ func (s *server) GetChat(ctx context.Context, in *pb.ChatRequest) (*pb.ChatReply
 		chats := x.([]*pb.Chat)
 		ret := &pb.ChatReply{Chats: chats, Cursor: ""}
 		tracer.Trace(time.Now().UTC(), ret)
+		fmt.Printf(cacheKey)
 		return ret, nil
 	}
 	var chats []*pb.Chat
