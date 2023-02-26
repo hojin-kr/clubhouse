@@ -64,6 +64,8 @@ func (s *server) GetProfile(ctx context.Context, in *pb.ProfileRequest) (*pb.Pro
 	tracer.Trace(in)
 	key := datastore.IDKey(getDatastoreKind("Profile"), in.Profile.GetAccountId(), nil)
 	ds.Get(ctx, key, in.Profile)
+	log.Print("out")
+	log.Print(in.Profile)
 	ret := &pb.ProfileReply{Profile: in.GetProfile()}
 
 	return ret, nil
