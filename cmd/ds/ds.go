@@ -4,12 +4,16 @@ import (
 	"context"
 	"log"
 	"os"
+	"time"
 
 	"cloud.google.com/go/datastore"
+	util "github.com/hojin-kr/clubhouse/cmd/util"
+	"github.com/patrickmn/go-cache"
 )
 
 var (
 	project_id = os.Getenv("PROJECT_ID")
+	c          = cache.New(10*time.Second, 10*time.Minute)
 )
 
 func GetClient(ctx context.Context) *datastore.Client {
@@ -22,9 +26,17 @@ func GetClient(ctx context.Context) *datastore.Client {
 }
 
 func Get(ctx context.Context, key *datastore.Key, dst interface{}) (err error) {
-	client := GetClient(ctx)
-	if err := client.Get(ctx, key, dst); err != nil {
-		log.Printf("get ds " + err.Error())
+	cacheKey := util.GetCacheKeyOfDatastoreKey(*key)
+	if x, found := c.Get(cacheKey); found {
+		log.Print("cache hit")
+		dst = x.(interface{})
+	} else {
+		log.Print("cache none")
+		client := GetClient(ctx)
+		if err := client.Get(ctx, key, dst); err != nil {
+			log.Printf("get ds " + err.Error())
+		}
+		c.Set(cacheKey, dst, cache.DefaultExpiration)
 	}
 	return err
 }
@@ -35,6 +47,8 @@ func Put(ctx context.Context, key *datastore.Key, src interface{}) (_key *datast
 	if err != nil {
 		log.Printf("put ds" + err.Error())
 	}
+	cacheKey := util.GetCacheKeyOfDatastoreKey(*key)
+	c.Set(cacheKey, src, cache.DefaultExpiration)
 	return key
 }
 

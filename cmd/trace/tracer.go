@@ -1,8 +1,36 @@
 package trace
 
 import (
+	"encoding/json"
+	"fmt"
 	"io"
+	"log"
+	"os"
 )
+
+var (
+	project_id = os.Getenv("PROJECT_ID")
+)
+
+type Entry struct {
+	Message  string `json:"message"`
+	Severity string `json:"severity,omitempty"`
+	Trace    string `json:"logging.googleapis.com/trace,omitempty"`
+
+	// Logs Explorer allows filtering and display of this as `jsonPayload.component`.
+	Component string `json:"component,omitempty"`
+}
+
+func (e Entry) String() string {
+	if e.Severity == "" {
+		e.Severity = "INFO"
+	}
+	out, err := json.Marshal(e)
+	if err != nil {
+		log.Printf("json.Marshal: %v", err)
+	}
+	return string(out)
+}
 
 // Tracer 코드 전체에서 이벤트를 추적할 수 있는 객체를 설명하는 인터페아스
 // 대문자 T로 시작한 이유는 공개적으로 보이는 타입임을 의미함
@@ -24,6 +52,12 @@ type tracer struct {
 func (t *tracer) Trace(a ...interface{}) {
 	// fmt.Fprint(t.out, a...)
 	// fmt.Fprintln(t.out)
+	log.Println(Entry{
+		Severity:  "INFO",
+		Message:   fmt.Sprintf("%s", a...),
+		Component: "component",
+		Trace:     fmt.Sprintf("projects/%s/traces", project_id),
+	})
 }
 
 type nilTracer struct{}
@@ -32,4 +66,11 @@ func (t *nilTracer) Trace(a ...interface{}) {}
 
 func Off() Tracer {
 	return &nilTracer{}
+}
+
+func init() {
+	// Disable log prefixes such as the default timestamp.
+	// Prefix text prevents the message from being parsed as JSON.
+	// A timestamp is added when shipping logs to Cloud Logging.
+	log.SetFlags(0)
 }
