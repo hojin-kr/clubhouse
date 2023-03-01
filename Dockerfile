@@ -9,4 +9,6 @@ RUN go build -o /app/clubhouse
 
 FROM scratch
 COPY --from=builder /app/clubhouse /app/clubhouse
-CMD [ "/app/clubhouse" ]
+ENV PORT=50051
+EXPOSE 50051
+ENTRYPOINT [ "/app/clubhouse" ]
