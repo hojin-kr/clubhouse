@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"cloud.google.com/go/datastore"
@@ -33,7 +34,7 @@ func GetCacheKeyOfDatastoreQuery(dsKind string, dsKey int64, custom string) stri
 func GetCacheKeyOfDatastoreQueryGameFilter(dsKind string, filters []*pb.GameFilter, order int64, cursor string) string {
 	var keys []string
 	for i := 0; i < len(filters); i++ {
-		keys = append(keys, filters[i].Key)
+		keys = append(keys, strconv.FormatInt(filters[i].Value, 10))
 	}
 	return fmt.Sprintf("%s:%s:%d:%s", dsKind, strings.Join(keys, ":"), order, cursor)
 }
