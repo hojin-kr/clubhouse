@@ -341,7 +341,7 @@ func (s *server) GetMyBeforeJoins(ctx context.Context, in *pb.JoinRequest) (*pb.
 	client := ds.GetClient(ctx)
 	cursorStr := in.Cursor
 	const pageSize = 50
-	query := datastore.NewQuery(getDatastoreKind("Join")).Filter("AccountId =", in.Join.GetAccountId()).Filter("Status =", StatusJoinAccept).Filter("Start <", time.Now().Unix()).Order("Start").Limit(pageSize)
+	query := datastore.NewQuery(getDatastoreKind("Join")).Filter("AccountId =", in.Join.GetAccountId()).Filter("Start <", time.Now().Unix()).Order("Start").Limit(pageSize)
 	if cursorStr != "" {
 		cursor, err := datastore.DecodeCursor(cursorStr)
 		if err != nil {
