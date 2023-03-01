@@ -12,4 +12,5 @@ RUN cp /app/clubhouse .
 
 FROM scratch
 COPY --from=builder /dist/clubhouse .
+EXPOSE 50051
 ENTRYPOINT ["/clubhouse"]
