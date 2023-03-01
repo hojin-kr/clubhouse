@@ -63,11 +63,14 @@ func (s *server) CreateAccount(ctx context.Context, in *pb.AccountRequest) (*pb.
 func (s *server) GetProfile(ctx context.Context, in *pb.ProfileRequest) (*pb.ProfileReply, error) {
 	tracer.Trace(in)
 	key := datastore.IDKey(getDatastoreKind("Profile"), in.Profile.GetAccountId(), nil)
+	cacheKey := util.GetCacheKeyOfDatastoreKey(*key)
+	if x, found := c.Get(cacheKey); found {
+		ret := &pb.ProfileReply{Profile: x.(*pb.Profile)}
+		return ret, nil
+	}
 	ds.Get(ctx, key, in.Profile)
-	log.Print("out")
-	log.Print(in.Profile)
 	ret := &pb.ProfileReply{Profile: in.GetProfile()}
-
+	go c.Set(cacheKey, in.Profile, cache.DefaultExpiration)
 	return ret, nil
 }
 
@@ -80,6 +83,7 @@ func (s *server) UpdateProfile(ctx context.Context, in *pb.ProfileRequest) (*pb.
 	}
 	key := datastore.IDKey(getDatastoreKind("Profile"), in.Profile.GetAccountId(), nil)
 	ds.Put(ctx, key, in.Profile)
+	go c.Set(util.GetCacheKeyOfDatastoreKey(*key), in.Profile, cache.DefaultExpiration)
 	ret := &pb.ProfileReply{Profile: in.GetProfile()}
 
 	return ret, nil
@@ -96,15 +100,21 @@ func (s *server) CreateGame(ctx context.Context, in *pb.GameRequest) (*pb.GameRe
 	ds.Put(ctx, datastore.IDKey(getDatastoreKind("GameList"), key.ID, nil), game) // 리스트에 뿌려주는 용도이며 TTL 세팅해서 지워지게
 	ret := &pb.GameReply{Game: game}
 
+	go c.Set(util.GetCacheKeyOfDatastoreKey(*key), game, cache.DefaultExpiration)
 	return ret, nil
 }
 
 func (s *server) GetGame(ctx context.Context, in *pb.GameRequest) (*pb.GameReply, error) {
 	tracer.Trace(in)
 	key := datastore.IDKey(getDatastoreKind("Game"), in.Game.GetId(), nil)
+	cacheKey := util.GetCacheKeyOfDatastoreKey(*key)
+	if x, found := c.Get(cacheKey); found {
+		ret := &pb.GameReply{Game: x.(*pb.Game)}
+		return ret, nil
+	}
 	ds.Get(ctx, key, in.Game)
 	ret := &pb.GameReply{Game: in.GetGame()}
-
+	go c.Set(cacheKey, in.Game, cache.DefaultExpiration)
 	return ret, nil
 }
 
@@ -144,7 +154,7 @@ func (s *server) UpdateGame(ctx context.Context, in *pb.GameRequest) (*pb.GameRe
 	_ = ds.Put(ctx, IDKey, in.Game)
 	_ = ds.Put(ctx, datastore.IDKey(getDatastoreKind("GameList"), in.Game.GetId(), nil), in.Game)
 	ret := &pb.GameReply{Game: in.GetGame()}
-
+	go c.Set(util.GetCacheKeyOfDatastoreKey(*IDKey), in.Game, cache.DefaultExpiration)
 	return ret, nil
 }
 
@@ -222,7 +232,7 @@ func (s *server) GetFilterdGames(ctx context.Context, in *pb.FilterdGamesRequest
 		}
 		_games = append(_games, &games[i])
 	}
-	c.Set(cacheKey, _games, cache.DefaultExpiration)
+	go c.Set(cacheKey, _games, cache.DefaultExpiration)
 	ret := &pb.FilterdGamesReply{Games: _games, Cursor: nextCursor.String()}
 
 	return ret, nil
@@ -253,9 +263,9 @@ func (s *server) UpdateJoin(ctx context.Context, in *pb.JoinRequest) (*pb.JoinRe
 	ds.Put(ctx, datastore.IDKey(getDatastoreKind("Join"), in.Join.GetJoinId(), nil), in.Join)
 	ret := &pb.JoinReply{Join: in.GetJoin()}
 	// del cache
-	c.Delete(util.GetCacheKeyOfDatastoreQuery("Join", in.Join.AccountId, "myJoins"))
-	c.Delete(util.GetCacheKeyOfDatastoreQuery("Join", in.Join.AccountId, "beforeJoins"))
-	c.Delete(util.GetCacheKeyOfDatastoreQuery("Join", in.Join.GameId, "gameJoins:"))
+	go c.Delete(util.GetCacheKeyOfDatastoreQuery("Join", in.Join.AccountId, "myJoins"))
+	go c.Delete(util.GetCacheKeyOfDatastoreQuery("Join", in.Join.AccountId, "beforeJoins"))
+	go c.Delete(util.GetCacheKeyOfDatastoreQuery("Join", in.Join.GameId, "gameJoins:"))
 	// todo push noti
 
 	return ret, nil
@@ -312,7 +322,7 @@ func (s *server) GetMyJoins(ctx context.Context, in *pb.JoinRequest) (*pb.JoinRe
 	for i := 0; i < len(joins); i++ {
 		_joins = append(_joins, &joins[i])
 	}
-	c.Set(cacheKey, _joins, cache.DefaultExpiration)
+	go c.Set(cacheKey, _joins, cache.DefaultExpiration)
 	ret := &pb.JoinReply{Joins: _joins, Cursor: nextCursor.String()}
 
 	return ret, nil
@@ -362,7 +372,7 @@ func (s *server) GetMyBeforeJoins(ctx context.Context, in *pb.JoinRequest) (*pb.
 	for i := 0; i < len(joins); i++ {
 		_joins = append(_joins, &joins[i])
 	}
-	c.Set(cacheKey, _joins, cache.DefaultExpiration)
+	go c.Set(cacheKey, _joins, cache.DefaultExpiration)
 	ret := &pb.JoinReply{Joins: _joins, Cursor: nextCursor.String()}
 
 	return ret, nil
@@ -411,7 +421,7 @@ func (s *server) GetGameJoins(ctx context.Context, in *pb.JoinRequest) (*pb.Join
 	for i := 0; i < len(joins); i++ {
 		_joins = append(_joins, &joins[i])
 	}
-	c.Set(cacheKey, _joins, cache.DefaultExpiration)
+	go c.Set(cacheKey, _joins, cache.DefaultExpiration)
 	ret := &pb.JoinReply{Joins: _joins, Cursor: nextCursor.String()}
 
 	return ret, nil
@@ -431,7 +441,7 @@ func (s *server) GetChat(ctx context.Context, in *pb.ChatRequest) (*pb.ChatReply
 	const pageSize = 100
 	q := datastore.NewQuery(getDatastoreKind("Chat")).Filter("ForeginId =", in.Chat.GetForeginId()).Order("Created").Limit(pageSize)
 	ds.GetAll(ctx, q, &chats)
-	c.Set(cacheKey, chats, cache.DefaultExpiration)
+	go c.Set(cacheKey, chats, cache.DefaultExpiration)
 	ret := &pb.ChatReply{Chats: chats, Cursor: ""}
 
 	return ret, nil
@@ -463,8 +473,7 @@ func (s *server) AddChatMessage(ctx context.Context, in *pb.ChatMessageRequest) 
 	const pageSize = 100
 	q := datastore.NewQuery(getDatastoreKind("Chat")).Filter("ForeginId =", in.GetForeginId()).Order("Created").Limit(pageSize)
 	ds.GetAll(ctx, q, &chats)
-	log.Printf(strconv.FormatInt(in.GetForeginId(), 10))
-	c.Set(cacheKey, chats, cache.DefaultExpiration)
+	go c.Set(cacheKey, chats, cache.DefaultExpiration)
 	ret := &pb.ChatReply{Chats: chats}
 	_ctx := context.Background()
 	go setChatPush(_ctx, in.ForeginId, in.GetAccountId(), in.ChatMessage.Message)
@@ -485,9 +494,19 @@ func setJoinRequestPush(ctx context.Context, in *pb.JoinRequest) {
 	var profile *pb.Profile
 	var apnsTokens []string
 	dsKeyGame := datastore.IDKey(getDatastoreKind("Game"), in.Join.GetGameId(), nil)
-	ds.Get(ctx, dsKeyGame, game)
+	if x, found := c.Get(util.GetCacheKeyOfDatastoreKey(*dsKeyGame)); found {
+		game = x.(*pb.Game)
+	} else {
+		ds.Get(ctx, dsKeyGame, game)
+	}
 	dsKeyProfile := datastore.IDKey(getDatastoreKind("Profile"), game.GetHostAccountId(), nil)
 	ds.Get(ctx, dsKeyProfile, profile)
+	if x, found := c.Get(util.GetCacheKeyOfDatastoreKey(*dsKeyProfile)); found {
+		profile = x.(*pb.Profile)
+	} else {
+		ds.Get(ctx, dsKeyProfile, profile)
+	}
+
 	if game.GetHostAccountId() != in.Join.AccountId {
 		apnsTokens = append(apnsTokens, profile.ApnsToken)
 		pushNotification(apnsTokens, "클럽하우스", game.PlaceName, "조인 신청이 도착했습니다.")
@@ -511,7 +530,11 @@ func setJoinChangePush(ctx context.Context, in *pb.GameRequest, before *pb.Game)
 		var profile *pb.Profile
 		var apnsTokens []string
 		dsKeyProfile := datastore.IDKey(getDatastoreKind("Profile"), accountID, nil)
-		ds.Get(ctx, dsKeyProfile, profile)
+		if x, found := c.Get(util.GetCacheKeyOfDatastoreKey(*dsKeyProfile)); found {
+			profile = x.(*pb.Profile)
+		} else {
+			ds.Get(ctx, dsKeyProfile, profile)
+		}
 		apnsTokens = append(apnsTokens, profile.ApnsToken)
 		pushNotification(apnsTokens, "클럽하우스", in.Game.PlaceName, "조인 신청이 "+changeStatus+"됐습니다.")
 	}
@@ -520,15 +543,24 @@ func setJoinChangePush(ctx context.Context, in *pb.GameRequest, before *pb.Game)
 func setChatPush(ctx context.Context, gameID int64, accountID int64, message string) {
 	if message != "" {
 		// accept account all
-		var game pb.Game
-		ds.Get(ctx, datastore.IDKey(getDatastoreKind("Game"), gameID, nil), &game)
+		var game *pb.Game
+		dsKeyGame := datastore.IDKey(getDatastoreKind("Game"), gameID, nil)
+		if x, found := c.Get(util.GetCacheKeyOfDatastoreKey(*dsKeyGame)); found {
+			game = x.(*pb.Game)
+		} else {
+			ds.Get(ctx, dsKeyGame, game)
+		}
 		var apnsTokens []string
 		game.AcceptAccountIds = append(game.AcceptAccountIds, game.HostAccountId)
 		for _, x := range game.AcceptAccountIds {
 			var profile *pb.Profile
 			if x != accountID {
 				dsKeyProfile := datastore.IDKey(getDatastoreKind("Profile"), x, nil)
-				ds.Get(ctx, dsKeyProfile, profile)
+				if x, found := c.Get(util.GetCacheKeyOfDatastoreKey(*dsKeyProfile)); found {
+					profile = x.(*pb.Profile)
+				} else {
+					ds.Get(ctx, dsKeyProfile, profile)
+				}
 				apnsTokens = append(apnsTokens, profile.ApnsToken)
 			}
 		}
@@ -681,9 +713,14 @@ func (s *server) CreateLike(ctx context.Context, in *pb.LikeRequest) (*pb.LikeRe
 
 // 계정 아이디로 푸시 발송
 func setAccountIdPush(ctx context.Context, id int64, title string, body string) {
-	var profile pb.Profile
+	var profile *pb.Profile
 	var apnsTokens []string
-	ds.Get(ctx, datastore.IDKey(getDatastoreKind(getDatastoreKind("Profile")), id, nil), &profile)
+	key := datastore.IDKey(getDatastoreKind(getDatastoreKind("Profile")), id, nil)
+	if x, found := c.Get(util.GetCacheKeyOfDatastoreKey(*key)); found {
+		profile = x.(*pb.Profile)
+	} else {
+		ds.Get(ctx, key, profile)
+	}
 	apnsTokens = append(apnsTokens, profile.ApnsToken)
 	pushNotification(apnsTokens, "클럽하우스", title, body)
 }
