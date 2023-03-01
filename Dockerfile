@@ -5,7 +5,7 @@ COPY . ./
 COPY go.mod ./
 COPY go.sum ./
 COPY cmd ./
-RUN go build -o /app/clubhouse
+RUN go build -o clubhouse .
 
 FROM scratch
 COPY --from=builder /app/clubhouse .
