@@ -7,10 +7,6 @@ COPY go.sum ./
 COPY cmd ./
 RUN go build -o /app/clubhouse
 
-WORKDIR /dist
-RUN cp /app/clubhouse .
-
 FROM scratch
-COPY --from=builder /dist/clubhouse .
-EXPOSE 50051
-ENTRYPOINT ["/clubhouse"]
+COPY --from=builder /app/clubhouse .
+CMD [ "/clubhouse" ]
