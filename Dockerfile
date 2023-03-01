@@ -7,7 +7,9 @@ COPY go.sum ./
 COPY cmd ./
 RUN go build -o /app/clubhouse
 
-# ENV PORT=50051
-# EXPOSE 50051
+WORKDIR /dist
+RUN cp /app/clubhouse .
 
-CMD [ "/app/clubhouse" ]
+FROM scratch
+COPY --from=builder /dist/clubhouse .
+ENTRYPOINT ["/clubhouse"]
