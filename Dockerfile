@@ -9,4 +9,4 @@ RUN go build -o clubhouse .
 
 FROM scratch
 COPY --from=builder /app/clubhouse .
-CMD [ "/clubhouse" ]
+CMD [ "./clubhouse" ]
