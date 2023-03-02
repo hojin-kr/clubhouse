@@ -549,11 +549,7 @@ func setChatPush(ctx context.Context, gameID int64, accountID int64, message str
 		// accept account all
 		var game pb.Game
 		dsKeyGame := datastore.IDKey(getDatastoreKind("Game"), gameID, nil)
-		if x, found := c.Get(util.GetCacheKeyOfDatastoreKey(*dsKeyGame)); found {
-			game = x.(pb.Game)
-		} else {
-			ds.Get(ctx, dsKeyGame, &game)
-		}
+		ds.Get(ctx, dsKeyGame, &game)
 		var apnsTokens []string
 		if x, found := c.Get("game:join:apnstokens"); found {
 			apnsTokens = x.([]string)
@@ -566,17 +562,11 @@ func setChatPush(ctx context.Context, gameID int64, accountID int64, message str
 				var profile pb.Profile
 				if x.AccountId != accountID {
 					dsKeyProfile := datastore.IDKey(getDatastoreKind("Profile"), x.AccountId, nil)
-					if x, found := c.Get(util.GetCacheKeyOfDatastoreKey(*dsKeyProfile)); found {
-						profile = x.(pb.Profile)
-					} else {
-						ds.Get(ctx, dsKeyProfile, &profile)
-						go c.Set(util.GetCacheKeyOfDatastoreKey(*dsKeyProfile), &profile, cache.DefaultExpiration)
-					}
+					ds.Get(ctx, dsKeyProfile, &profile)
 					apnsTokens = append(apnsTokens, profile.ApnsToken)
 				}
 			}
 		}
-		log.Print(apnsTokens)
 		if len(apnsTokens) > 0 {
 			pushNotification(apnsTokens, "클럽하우스", game.PlaceName, message)
 			go c.Set("game:join:apnstokens", apnsTokens, cache.DefaultExpiration)
