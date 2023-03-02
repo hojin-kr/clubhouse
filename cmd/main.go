@@ -547,10 +547,10 @@ func setJoinChangePush(ctx context.Context, in *pb.GameRequest, before *pb.Game)
 func setChatPush(ctx context.Context, gameID int64, accountID int64, message string) {
 	if message != "" {
 		// accept account all
-		var game *pb.Game
+		var game pb.Game
 		dsKeyGame := datastore.IDKey(getDatastoreKind("Game"), gameID, nil)
 		if x, found := c.Get(util.GetCacheKeyOfDatastoreKey(*dsKeyGame)); found {
-			game = x.(*pb.Game)
+			game = x.(pb.Game)
 		} else {
 			ds.Get(ctx, dsKeyGame, game)
 		}
@@ -559,15 +559,15 @@ func setChatPush(ctx context.Context, gameID int64, accountID int64, message str
 			apnsTokens = x.([]string)
 		} else {
 			// 게임 참가 유저 목록 조인 통해서 조회
-			var joins []*pb.Join
+			var joins []pb.Join
 			q := datastore.NewQuery(getDatastoreKind("Join")).Filter("GameId =", gameID).Filter("Status =", StatusJoinAccept).Limit(10)
 			ds.GetAll(ctx, q, &joins)
 			for _, x := range joins {
-				var profile *pb.Profile
+				var profile pb.Profile
 				if x.AccountId != accountID {
 					dsKeyProfile := datastore.IDKey(getDatastoreKind("Profile"), x.AccountId, nil)
 					if x, found := c.Get(util.GetCacheKeyOfDatastoreKey(*dsKeyProfile)); found {
-						profile = x.(*pb.Profile)
+						profile = x.(pb.Profile)
 					} else {
 						ds.Get(ctx, dsKeyProfile, profile)
 						go c.Set(util.GetCacheKeyOfDatastoreKey(*dsKeyProfile), profile, cache.DefaultExpiration)
