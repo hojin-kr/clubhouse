@@ -467,7 +467,7 @@ func (s *server) AddChatMessage(ctx context.Context, in *pb.ChatMessageRequest) 
 	}
 	in.ChatMessage.Created = NowUnix
 	in.ChatMessage.AccountId = in.GetAccountId()
-	Chat.ChatMessages = append(Chat.ChatMessages, in.ChatMessage)[:chatSize]
+	Chat.ChatMessages = append(Chat.ChatMessages, in.ChatMessage)
 	if len(Chat.ChatMessages) > chatSize {
 		Chat.ChatMessages = Chat.ChatMessages[1:]
 	}
