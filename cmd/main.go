@@ -452,7 +452,7 @@ func (s *server) AddChatMessage(ctx context.Context, in *pb.ChatMessageRequest) 
 	tracer.Trace(in)
 	cacheKey := util.GetCacheKeyOfDatastoreQuery("Chat", in.ForeginId, "")
 	var Chat pb.Chat
-	const chatSize = 1000
+	const chatSize = 500
 	// get
 	key := datastore.NameKey(getDatastoreKind("Chat"), strconv.FormatInt(in.GetForeginId()+in.GetAccountId(), 10), nil)
 	ds.Get(ctx, key, &Chat)
@@ -555,21 +555,30 @@ func setChatPush(ctx context.Context, gameID int64, accountID int64, message str
 			ds.Get(ctx, dsKeyGame, game)
 		}
 		var apnsTokens []string
-		game.AcceptAccountIds = append(game.AcceptAccountIds, game.HostAccountId)
-		for _, x := range game.AcceptAccountIds {
-			var profile *pb.Profile
-			if x != accountID {
-				dsKeyProfile := datastore.IDKey(getDatastoreKind("Profile"), x, nil)
-				if x, found := c.Get(util.GetCacheKeyOfDatastoreKey(*dsKeyProfile)); found {
-					profile = x.(*pb.Profile)
-				} else {
-					ds.Get(ctx, dsKeyProfile, profile)
+		if x, found := c.Get("game:join:apnstokens"); found {
+			apnsTokens = x.([]string)
+		} else {
+			// 게임 참가 유저 목록 조인 통해서 조회
+			var joins []*pb.Join
+			q := datastore.NewQuery(getDatastoreKind("Join")).Filter("GameId =", gameID).Filter("Status =", StatusJoinAccept).Limit(10)
+			ds.GetAll(ctx, q, &joins)
+			for _, x := range joins {
+				var profile *pb.Profile
+				if x.AccountId != accountID {
+					dsKeyProfile := datastore.IDKey(getDatastoreKind("Profile"), x.AccountId, nil)
+					if x, found := c.Get(util.GetCacheKeyOfDatastoreKey(*dsKeyProfile)); found {
+						profile = x.(*pb.Profile)
+					} else {
+						ds.Get(ctx, dsKeyProfile, profile)
+						go c.Set(util.GetCacheKeyOfDatastoreKey(*dsKeyProfile), profile, cache.DefaultExpiration)
+					}
+					apnsTokens = append(apnsTokens, profile.ApnsToken)
 				}
-				apnsTokens = append(apnsTokens, profile.ApnsToken)
 			}
 		}
 		if len(apnsTokens) > 0 {
 			pushNotification(apnsTokens, "클럽하우스", game.PlaceName, message)
+			go c.Set("game:join:apnstokens", apnsTokens, cache.DefaultExpiration)
 		}
 	}
 }
