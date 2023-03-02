@@ -494,21 +494,21 @@ func (s *server) GetPlaceKaKao(ctx context.Context, in *pb.PlaceKakaoRequest) (*
 }
 
 func setJoinRequestPush(ctx context.Context, in *pb.JoinRequest) {
-	var game *pb.Game
-	var profile *pb.Profile
+	var game pb.Game
+	var profile pb.Profile
 	var apnsTokens []string
 	dsKeyGame := datastore.IDKey(getDatastoreKind("Game"), in.Join.GetGameId(), nil)
 	if x, found := c.Get(util.GetCacheKeyOfDatastoreKey(*dsKeyGame)); found {
-		game = x.(*pb.Game)
+		game = x.(pb.Game)
 	} else {
-		ds.Get(ctx, dsKeyGame, game)
+		ds.Get(ctx, dsKeyGame, &game)
 	}
 	dsKeyProfile := datastore.IDKey(getDatastoreKind("Profile"), game.GetHostAccountId(), nil)
-	ds.Get(ctx, dsKeyProfile, profile)
+	ds.Get(ctx, dsKeyProfile, &profile)
 	if x, found := c.Get(util.GetCacheKeyOfDatastoreKey(*dsKeyProfile)); found {
-		profile = x.(*pb.Profile)
+		profile = x.(pb.Profile)
 	} else {
-		ds.Get(ctx, dsKeyProfile, profile)
+		ds.Get(ctx, dsKeyProfile, &profile)
 	}
 
 	if game.GetHostAccountId() != in.Join.AccountId {
@@ -552,14 +552,14 @@ func setChatPush(ctx context.Context, gameID int64, accountID int64, message str
 		if x, found := c.Get(util.GetCacheKeyOfDatastoreKey(*dsKeyGame)); found {
 			game = x.(pb.Game)
 		} else {
-			ds.Get(ctx, dsKeyGame, game)
+			ds.Get(ctx, dsKeyGame, &game)
 		}
 		var apnsTokens []string
 		if x, found := c.Get("game:join:apnstokens"); found {
 			apnsTokens = x.([]string)
 		} else {
 			// 게임 참가 유저 목록 조인 통해서 조회
-			var joins []pb.Join
+			var joins []*pb.Join
 			q := datastore.NewQuery(getDatastoreKind("Join")).Filter("GameId =", gameID).Filter("Status =", StatusJoinAccept).Limit(10)
 			ds.GetAll(ctx, q, &joins)
 			for _, x := range joins {
@@ -569,13 +569,14 @@ func setChatPush(ctx context.Context, gameID int64, accountID int64, message str
 					if x, found := c.Get(util.GetCacheKeyOfDatastoreKey(*dsKeyProfile)); found {
 						profile = x.(pb.Profile)
 					} else {
-						ds.Get(ctx, dsKeyProfile, profile)
-						go c.Set(util.GetCacheKeyOfDatastoreKey(*dsKeyProfile), profile, cache.DefaultExpiration)
+						ds.Get(ctx, dsKeyProfile, &profile)
+						go c.Set(util.GetCacheKeyOfDatastoreKey(*dsKeyProfile), &profile, cache.DefaultExpiration)
 					}
 					apnsTokens = append(apnsTokens, profile.ApnsToken)
 				}
 			}
 		}
+		log.Print(apnsTokens)
 		if len(apnsTokens) > 0 {
 			pushNotification(apnsTokens, "클럽하우스", game.PlaceName, message)
 			go c.Set("game:join:apnstokens", apnsTokens, cache.DefaultExpiration)
