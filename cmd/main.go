@@ -452,7 +452,7 @@ func (s *server) AddChatMessage(ctx context.Context, in *pb.ChatMessageRequest) 
 	tracer.Trace(in)
 	cacheKey := util.GetCacheKeyOfDatastoreQuery("Chat", in.ForeginId, "")
 	var Chat pb.Chat
-	const chatSize = 10
+	const chatSize = 1000
 	// get
 	key := datastore.NameKey(getDatastoreKind("Chat"), strconv.FormatInt(in.GetForeginId()+in.GetAccountId(), 10), nil)
 	ds.Get(ctx, key, &Chat)
