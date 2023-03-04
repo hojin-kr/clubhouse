@@ -431,8 +431,7 @@ func (s *server) GetChat(ctx context.Context, in *pb.ChatRequest) (*pb.ChatReply
 	if x, found := c.Get(cacheKey); found {
 		chats := x.([]*pb.Chat)
 		ret := &pb.ChatReply{Chats: chats, Cursor: ""}
-
-		fmt.Printf(cacheKey)
+		tracer.Trace(cacheKey + " getChatCacheHit")
 		return ret, nil
 	}
 	var chats []*pb.Chat
