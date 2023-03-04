@@ -135,7 +135,6 @@ func (s *server) GetGameMulti(ctx context.Context, in *pb.GameMultiRequest) (*pb
 		fmt.Printf(cacheKey)
 		return ret, nil
 	}
-	keys = append(keys)
 	games := make([]*pb.Game, len(in.GameIds))
 	ds.GetMulti(ctx, keys, games)
 	c.Set(cacheKey, games, cache.DefaultExpiration)
@@ -536,28 +535,34 @@ func setJoinChangePush(ctx context.Context, in *pb.GameRequest, before *pb.Game)
 func setChatPush(ctx context.Context, gameID int64, accountID int64, message string) {
 	if message != "" {
 		// accept account all
-		var game pb.Game
+		var game *pb.Game
+		var senderName string
 		dsKeyGame := datastore.IDKey(getDatastoreKind("Game"), gameID, nil)
-		ds.Get(ctx, dsKeyGame, &game)
+		ds.Get(ctx, dsKeyGame, game)
 		var apnsTokens []string
-		if x, found := c.Get("game:chat:apnstokens"); found {
-			apnsTokens = x.([]string)
-		} else {
-			// 게임 참가 유저 목록 조인 통해서 조회
-			var joins []*pb.Join
-			q := datastore.NewQuery(getDatastoreKind("Join")).Filter("GameId =", gameID).Filter("Status =", StatusJoinAccept).Limit(10)
-			ds.GetAll(ctx, q, &joins)
-			for _, x := range joins {
-				var profile pb.Profile
-				if x.AccountId != accountID {
-					dsKeyProfile := datastore.IDKey(getDatastoreKind("Profile"), x.AccountId, nil)
-					ds.Get(ctx, dsKeyProfile, &profile)
-					apnsTokens = append(apnsTokens, profile.ApnsToken)
-				}
+		var joins []*pb.Join
+		q := datastore.NewQuery(getDatastoreKind("Join")).Filter("GameId =", gameID).Filter("Status =", StatusJoinAccept).Limit(10)
+		ds.GetAll(ctx, q, &joins)
+		keys := []*datastore.Key{}
+		for _, x := range joins {
+			dsKeyProfile := datastore.IDKey(getDatastoreKind("Profile"), x.AccountId, nil)
+			keys = append(keys, dsKeyProfile)
+		}
+		profiles := make([]*pb.Profile, len(keys))
+		ds.GetMulti(ctx, keys, profiles)
+		for _, p := range profiles {
+			// sender에게는 보내지 않음
+			if p.AccountId != accountID {
+				apnsTokens = append(apnsTokens, p.ApnsToken)
+			}
+			// sender name 포함해서 발송
+			if p.AccountId == accountID {
+				senderName = p.Name
 			}
 		}
 		if len(apnsTokens) > 0 {
-			pushNotification(apnsTokens, "클럽하우스", game.PlaceName, message)
+			// todo PlaceName 은 변하지 않는 값이라서 클라이언트에서 받아와서 보내는걸로 변경
+			pushNotification(apnsTokens, "클럽하우스", game.PlaceName, senderName+" : "+message)
 			go c.Set("game:chat:apnstokens", apnsTokens, cache.DefaultExpiration)
 		}
 	}
