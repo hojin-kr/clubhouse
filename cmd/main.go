@@ -494,21 +494,21 @@ func (s *server) GetPlaceKaKao(ctx context.Context, in *pb.PlaceKakaoRequest) (*
 }
 
 func setJoinRequestPush(ctx context.Context, in *pb.JoinRequest) {
-	var game pb.Game
-	var profile pb.Profile
+	var game *pb.Game
+	var profile *pb.Profile
 	var apnsTokens []string
 	dsKeyGame := datastore.IDKey(getDatastoreKind("Game"), in.Join.GetGameId(), nil)
 	if x, found := c.Get(util.GetCacheKeyOfDatastoreKey(*dsKeyGame)); found {
-		game = x.(pb.Game)
+		game = x.(*pb.Game)
 	} else {
-		ds.Get(ctx, dsKeyGame, &game)
+		ds.Get(ctx, dsKeyGame, game)
 	}
 	dsKeyProfile := datastore.IDKey(getDatastoreKind("Profile"), game.GetHostAccountId(), nil)
 	ds.Get(ctx, dsKeyProfile, &profile)
 	if x, found := c.Get(util.GetCacheKeyOfDatastoreKey(*dsKeyProfile)); found {
-		profile = x.(pb.Profile)
+		profile = x.(*pb.Profile)
 	} else {
-		ds.Get(ctx, dsKeyProfile, &profile)
+		ds.Get(ctx, dsKeyProfile, profile)
 	}
 
 	if game.GetHostAccountId() != in.Join.AccountId {
