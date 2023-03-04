@@ -492,14 +492,14 @@ func (s *server) GetPlaceKaKao(ctx context.Context, in *pb.PlaceKakaoRequest) (*
 }
 
 func setJoinRequestPush(ctx context.Context, in *pb.JoinRequest) {
-	var game *pb.Game
-	var profile *pb.Profile
+	var game pb.Game
+	var profile pb.Profile
 	var apnsTokens []string
 	dsKeyGame := datastore.IDKey(getDatastoreKind("Game"), in.Join.GetGameId(), nil)
-	ds.Get(ctx, dsKeyGame, game)
+	ds.Get(ctx, dsKeyGame, &game)
 	if game.GetHostAccountId() != in.Join.AccountId {
 		dsKeyProfile := datastore.IDKey(getDatastoreKind("Profile"), game.GetHostAccountId(), nil)
-		ds.Get(ctx, dsKeyProfile, profile)
+		ds.Get(ctx, dsKeyProfile, &profile)
 		apnsTokens = append(apnsTokens, profile.ApnsToken)
 		pushNotification(apnsTokens, "클럽하우스", game.PlaceName, "조인 신청이 도착했습니다.")
 	} else {
@@ -519,13 +519,13 @@ func setJoinChangePush(ctx context.Context, in *pb.GameRequest, before *pb.Game)
 		changeStatus = "거절"
 	}
 	if changeStatus != "" {
-		var profile *pb.Profile
+		var profile pb.Profile
 		var apnsTokens []string
 		dsKeyProfile := datastore.IDKey(getDatastoreKind("Profile"), accountID, nil)
 		if x, found := c.Get(util.GetCacheKeyOfDatastoreKey(*dsKeyProfile)); found {
-			profile = x.(*pb.Profile)
+			profile = x.(pb.Profile)
 		} else {
-			ds.Get(ctx, dsKeyProfile, profile)
+			ds.Get(ctx, dsKeyProfile, &profile)
 		}
 		apnsTokens = append(apnsTokens, profile.ApnsToken)
 		pushNotification(apnsTokens, "클럽하우스", in.Game.PlaceName, "조인 신청이 "+changeStatus+"됐습니다.")
@@ -535,10 +535,10 @@ func setJoinChangePush(ctx context.Context, in *pb.GameRequest, before *pb.Game)
 func setChatPush(ctx context.Context, gameID int64, accountID int64, message string) {
 	if message != "" {
 		// accept account all
-		var game *pb.Game
+		var game pb.Game
 		var senderName string
 		dsKeyGame := datastore.IDKey(getDatastoreKind("Game"), gameID, nil)
-		ds.Get(ctx, dsKeyGame, game)
+		ds.Get(ctx, dsKeyGame, &game)
 		var apnsTokens []string
 		var joins []*pb.Join
 		q := datastore.NewQuery(getDatastoreKind("Join")).Filter("GameId =", gameID).Filter("Status =", StatusJoinAccept).Limit(10)
