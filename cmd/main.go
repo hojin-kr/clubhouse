@@ -497,19 +497,10 @@ func setJoinRequestPush(ctx context.Context, in *pb.JoinRequest) {
 	var profile *pb.Profile
 	var apnsTokens []string
 	dsKeyGame := datastore.IDKey(getDatastoreKind("Game"), in.Join.GetGameId(), nil)
-	if x, found := c.Get(util.GetCacheKeyOfDatastoreKey(*dsKeyGame)); found {
-		game = x.(*pb.Game)
-	} else {
-		ds.Get(ctx, dsKeyGame, game)
-	}
-	dsKeyProfile := datastore.IDKey(getDatastoreKind("Profile"), game.GetHostAccountId(), nil)
-	if x, found := c.Get(util.GetCacheKeyOfDatastoreKey(*dsKeyProfile)); found {
-		profile = x.(*pb.Profile)
-	} else {
-		ds.Get(ctx, dsKeyProfile, profile)
-	}
-
+	ds.Get(ctx, dsKeyGame, game)
 	if game.GetHostAccountId() != in.Join.AccountId {
+		dsKeyProfile := datastore.IDKey(getDatastoreKind("Profile"), game.GetHostAccountId(), nil)
+		ds.Get(ctx, dsKeyProfile, profile)
 		apnsTokens = append(apnsTokens, profile.ApnsToken)
 		pushNotification(apnsTokens, "클럽하우스", game.PlaceName, "조인 신청이 도착했습니다.")
 	} else {
@@ -549,7 +540,7 @@ func setChatPush(ctx context.Context, gameID int64, accountID int64, message str
 		dsKeyGame := datastore.IDKey(getDatastoreKind("Game"), gameID, nil)
 		ds.Get(ctx, dsKeyGame, &game)
 		var apnsTokens []string
-		if x, found := c.Get("game:join:apnstokens"); found {
+		if x, found := c.Get("game:chat:apnstokens"); found {
 			apnsTokens = x.([]string)
 		} else {
 			// 게임 참가 유저 목록 조인 통해서 조회
@@ -567,7 +558,7 @@ func setChatPush(ctx context.Context, gameID int64, accountID int64, message str
 		}
 		if len(apnsTokens) > 0 {
 			pushNotification(apnsTokens, "클럽하우스", game.PlaceName, message)
-			go c.Set("game:join:apnstokens", apnsTokens, cache.DefaultExpiration)
+			go c.Set("game:chat:apnstokens", apnsTokens, cache.DefaultExpiration)
 		}
 	}
 }
