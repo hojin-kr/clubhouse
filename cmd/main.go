@@ -248,7 +248,6 @@ func (s *server) Join(ctx context.Context, in *pb.JoinRequest) (*pb.JoinReply, e
 	ret := &pb.JoinReply{Join: join}
 	_ctx := context.Background()
 	go setJoinRequestPush(_ctx, in)
-
 	return ret, nil
 }
 
@@ -504,7 +503,6 @@ func setJoinRequestPush(ctx context.Context, in *pb.JoinRequest) {
 		ds.Get(ctx, dsKeyGame, game)
 	}
 	dsKeyProfile := datastore.IDKey(getDatastoreKind("Profile"), game.GetHostAccountId(), nil)
-	ds.Get(ctx, dsKeyProfile, &profile)
 	if x, found := c.Get(util.GetCacheKeyOfDatastoreKey(*dsKeyProfile)); found {
 		profile = x.(*pb.Profile)
 	} else {
