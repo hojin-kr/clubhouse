@@ -249,11 +249,11 @@ func (s *server) UpdateJoin(ctx context.Context, in *pb.JoinRequest) (*pb.JoinRe
 	in.Join.Updated = time.Now().Unix()
 	ds.Put(ctx, datastore.IDKey(getDatastoreKind("Join"), in.Join.GetJoinId(), nil), in.Join)
 	ret := &pb.JoinReply{Join: in.GetJoin()}
+	go setJoinUpdatePush(ctx, in)
 	// del cache
 	go c.Delete(util.GetCacheKeyOfDatastoreQuery("Join", in.Join.AccountId, "myJoins"))
 	go c.Delete(util.GetCacheKeyOfDatastoreQuery("Join", in.Join.AccountId, "beforeJoins"))
 	go c.Delete(util.GetCacheKeyOfDatastoreQuery("Join", in.Join.GameId, "gameJoins:"))
-	// todo push noti
 
 	return ret, nil
 }
@@ -492,6 +492,27 @@ func setJoinRequestPush(ctx context.Context, in *pb.JoinRequest) {
 		pushNotification(apnsTokens, "클럽하우스", game.PlaceName, "조인 신청이 도착했습니다.")
 	} else {
 
+	}
+}
+
+func setJoinUpdatePush(ctx context.Context, in *pb.JoinRequest) {
+	var game pb.Game
+	var profile pb.Profile
+	var apnsTokens []string
+	dsKeyGame := datastore.IDKey(getDatastoreKind("Game"), in.Join.GetGameId(), nil)
+	ds.Get(ctx, dsKeyGame, &game)
+	if game.GetHostAccountId() != in.Join.AccountId {
+		dsKeyProfile := datastore.IDKey(getDatastoreKind("Profile"), in.Join.JoinId, nil)
+		ds.Get(ctx, dsKeyProfile, &profile)
+		apnsTokens = append(apnsTokens, profile.ApnsToken)
+		StringStatus := "수락"
+		if in.Join.Status == StatusJoinReject {
+			StringStatus = "거절"
+		}
+		if in.Join.Status == StatusJoinCancel {
+			StringStatus = "취소"
+		}
+		pushNotification(apnsTokens, "클럽하우스", game.PlaceName, "조인이 "+StringStatus+" 되었습니다")
 	}
 }
 
