@@ -135,7 +135,7 @@ func (s *server) GetGameMulti(ctx context.Context, in *pb.GameMultiRequest) (*pb
 	}
 	games := make([]*pb.Game, len(in.GameIds))
 	ds.GetMulti(ctx, keys, games)
-	if len(games) >= 1 {
+	if len(games) > 1 {
 		c.Set(cacheKey, games, cache.DefaultExpiration)
 	}
 	ret := &pb.GameMultiReply{Games: games}
