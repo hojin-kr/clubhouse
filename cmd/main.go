@@ -502,7 +502,7 @@ func setJoinUpdatePush(ctx context.Context, in *pb.JoinRequest) {
 	var apnsTokens []string
 	dsKeyGame := datastore.IDKey(getDatastoreKind("Game"), in.Join.GetGameId(), nil)
 	ds.Get(ctx, dsKeyGame, &game)
-	dsKeyProfile := datastore.IDKey(getDatastoreKind("Profile"), in.Join.JoinId, nil)
+	dsKeyProfile := datastore.IDKey(getDatastoreKind("Profile"), in.Join.AccountId, nil)
 	ds.Get(ctx, dsKeyProfile, &profile)
 	apnsTokens = append(apnsTokens, profile.ApnsToken)
 	StringStatus := "수락"
