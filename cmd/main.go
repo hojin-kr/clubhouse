@@ -128,11 +128,9 @@ func (s *server) GetGameMulti(ctx context.Context, in *pb.GameMultiRequest) (*pb
 		cacheKey += util.GetCacheKeyOfDatastoreKey(*key)
 	}
 	if x, found := c.Get(cacheKey); found {
-		games := make([]*pb.Game, len(in.GameIds))
-		games = x.([]*pb.Game)
+		games := x.([]*pb.Game)
 		ret := &pb.GameMultiReply{Games: games}
-
-		fmt.Printf(cacheKey)
+		tracer.Trace(cacheKey)
 		return ret, nil
 	}
 	games := make([]*pb.Game, len(in.GameIds))
