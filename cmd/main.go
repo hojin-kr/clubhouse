@@ -121,23 +121,12 @@ func (s *server) GetGame(ctx context.Context, in *pb.GameRequest) (*pb.GameReply
 func (s *server) GetGameMulti(ctx context.Context, in *pb.GameMultiRequest) (*pb.GameMultiReply, error) {
 	tracer.Trace(in)
 	keys := []*datastore.Key{}
-	var cacheKey string
 	for i := 0; i < len(in.GameIds); i++ {
 		key := datastore.IDKey(getDatastoreKind("Game"), in.GameIds[i], nil)
 		keys = append(keys, key)
-		cacheKey += util.GetCacheKeyOfDatastoreKey(*key)
-	}
-	if x, found := c.Get(cacheKey); found {
-		games := x.([]*pb.Game)
-		ret := &pb.GameMultiReply{Games: games}
-		tracer.Trace(cacheKey)
-		return ret, nil
 	}
 	games := make([]*pb.Game, len(in.GameIds))
 	ds.GetMulti(ctx, keys, games)
-	if len(games) > 1 {
-		c.Set(cacheKey, games, cache.DefaultExpiration)
-	}
 	ret := &pb.GameMultiReply{Games: games}
 
 	return ret, nil
