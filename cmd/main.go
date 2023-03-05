@@ -249,7 +249,8 @@ func (s *server) UpdateJoin(ctx context.Context, in *pb.JoinRequest) (*pb.JoinRe
 	in.Join.Updated = time.Now().Unix()
 	ds.Put(ctx, datastore.IDKey(getDatastoreKind("Join"), in.Join.GetJoinId(), nil), in.Join)
 	ret := &pb.JoinReply{Join: in.GetJoin()}
-	go setJoinUpdatePush(ctx, in)
+	_ctx := context.Background()
+	go setJoinUpdatePush(_ctx, in)
 	// del cache
 	go c.Delete(util.GetCacheKeyOfDatastoreQuery("Join", in.Join.AccountId, "myJoins"))
 	go c.Delete(util.GetCacheKeyOfDatastoreQuery("Join", in.Join.AccountId, "beforeJoins"))
