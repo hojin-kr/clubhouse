@@ -8,6 +8,8 @@ on:
 env:
   APP_ENVIRONMENT: dev
   SERVICE_NAME: clubhouse
+  ETCD_IS_AD: false
+  ETCD_INTERVAL_AD: 300
 
 jobs:
   setup-deploy:
@@ -76,6 +78,10 @@ jobs:
                   value : ${{ secrets.APPLE_APNS_KEY }}
                 - name : KAKAO_REST_API_KEY
                   value : ${{ secrets.KAKAO_REST_API_KEY }}
+                - name : ETCD_IS_AD
+                  value : ${ETCD_IS_AD}
+                - name : ETCD_INTERVAL_AD
+                  value : ${ETCD_INTERVAL_AD}
                 resources:
                   limits:
                     cpu: 1000m
