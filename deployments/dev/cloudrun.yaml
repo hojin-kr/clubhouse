@@ -30,6 +30,10 @@ spec:
           value : ${APPLE_APNS_KEY}
         - name : KAKAO_REST_API_KEY
           value : ${KAKAO_REST_API_KEY}
+        - name : ETCD_IS_AD
+          value : false
+        - name : ETCD_INTERVAL_AD
+          value : 300
         resources:
           limits:
             cpu: 1000m

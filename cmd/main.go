@@ -743,9 +743,9 @@ func (s *server) UpdateLike(ctx context.Context, in *pb.LikeRequest) (*pb.LikeRe
 func (s *server) GetEtcd(ctx context.Context, in *pb.EtcdRequest) (*pb.EtcdReply, error) {
 	tracer.Trace(in)
 	switch in.Key {
-	case "IS_AD":
+	case "ETCD_IS_AD":
 		in.Value = os.Getenv("IS_AD")
-	case "INTERVAL_AD":
+	case "ETCD_INTERVAL_AD":
 		in.Value = os.Getenv("INTERVAL_AD")
 	}
 	ret := &pb.EtcdReply{Key: in.Key, Value: in.Value}
