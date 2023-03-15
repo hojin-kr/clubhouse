@@ -8,8 +8,8 @@ on:
 env:
   APP_ENVIRONMENT: production
   SERVICE_NAME: clubhouse
-  ETCD_IS_AD: false
-  ETCD_INTERVAL_AD: 300
+  ETCD_IS_AD: "false"
+  ETCD_INTERVAL_AD: "300"
 
 jobs:
   setup-deploy:
