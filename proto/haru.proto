@@ -46,6 +46,17 @@ service version1 {
   rpc UpdateLike (LikeRequest) returns (LikeReply) {}
   rpc GetCount (Count) returns (Count) {}
   rpc GetPlaceKaKao (PlaceKakaoRequest) returns (PlaceKakaoReply) {}
+  rpc GetEtcd (EtcdRequest) returns (EtcdReply) {}
+}
+
+message EtcdRequest {
+  string key = 1;
+  string value = 2;
+}
+
+message EtcdReply {
+  string key = 1;
+  string value = 2;
 }
 
 message Account {

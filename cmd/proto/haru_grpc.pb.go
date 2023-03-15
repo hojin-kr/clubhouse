@@ -45,6 +45,7 @@ type Version1Client interface {
 	UpdateLike(ctx context.Context, in *LikeRequest, opts ...grpc.CallOption) (*LikeReply, error)
 	GetCount(ctx context.Context, in *Count, opts ...grpc.CallOption) (*Count, error)
 	GetPlaceKaKao(ctx context.Context, in *PlaceKakaoRequest, opts ...grpc.CallOption) (*PlaceKakaoReply, error)
+	GetEtcd(ctx context.Context, in *EtcdRequest, opts ...grpc.CallOption) (*EtcdReply, error)
 }
 
 type version1Client struct {
@@ -262,6 +263,15 @@ func (c *version1Client) GetPlaceKaKao(ctx context.Context, in *PlaceKakaoReques
 	return out, nil
 }
 
+func (c *version1Client) GetEtcd(ctx context.Context, in *EtcdRequest, opts ...grpc.CallOption) (*EtcdReply, error) {
+	out := new(EtcdReply)
+	err := c.cc.Invoke(ctx, "/haru.version1/GetEtcd", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Version1Server is the server API for Version1 service.
 // All implementations must embed UnimplementedVersion1Server
 // for forward compatibility
@@ -289,6 +299,7 @@ type Version1Server interface {
 	UpdateLike(context.Context, *LikeRequest) (*LikeReply, error)
 	GetCount(context.Context, *Count) (*Count, error)
 	GetPlaceKaKao(context.Context, *PlaceKakaoRequest) (*PlaceKakaoReply, error)
+	GetEtcd(context.Context, *EtcdRequest) (*EtcdReply, error)
 	mustEmbedUnimplementedVersion1Server()
 }
 
@@ -364,6 +375,9 @@ func (UnimplementedVersion1Server) GetCount(context.Context, *Count) (*Count, er
 }
 func (UnimplementedVersion1Server) GetPlaceKaKao(context.Context, *PlaceKakaoRequest) (*PlaceKakaoReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPlaceKaKao not implemented")
+}
+func (UnimplementedVersion1Server) GetEtcd(context.Context, *EtcdRequest) (*EtcdReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetEtcd not implemented")
 }
 func (UnimplementedVersion1Server) mustEmbedUnimplementedVersion1Server() {}
 
@@ -792,6 +806,24 @@ func _Version1_GetPlaceKaKao_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Version1_GetEtcd_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EtcdRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(Version1Server).GetEtcd(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/haru.version1/GetEtcd",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(Version1Server).GetEtcd(ctx, req.(*EtcdRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Version1_ServiceDesc is the grpc.ServiceDesc for Version1 service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -890,6 +922,10 @@ var Version1_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetPlaceKaKao",
 			Handler:    _Version1_GetPlaceKaKao_Handler,
+		},
+		{
+			MethodName: "GetEtcd",
+			Handler:    _Version1_GetEtcd_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

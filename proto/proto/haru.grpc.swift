@@ -147,6 +147,11 @@ internal protocol Haru_version1ClientProtocol: GRPCClient {
     _ request: Haru_PlaceKakaoRequest,
     callOptions: CallOptions?
   ) -> UnaryCall<Haru_PlaceKakaoRequest, Haru_PlaceKakaoReply>
+
+  func getEtcd(
+    _ request: Haru_EtcdRequest,
+    callOptions: CallOptions?
+  ) -> UnaryCall<Haru_EtcdRequest, Haru_EtcdReply>
 }
 
 extension Haru_version1ClientProtocol {
@@ -567,6 +572,24 @@ extension Haru_version1ClientProtocol {
       interceptors: self.interceptors?.makeGetPlaceKaKaoInterceptors() ?? []
     )
   }
+
+  /// Unary call to GetEtcd
+  ///
+  /// - Parameters:
+  ///   - request: Request to send to GetEtcd.
+  ///   - callOptions: Call options.
+  /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
+  internal func getEtcd(
+    _ request: Haru_EtcdRequest,
+    callOptions: CallOptions? = nil
+  ) -> UnaryCall<Haru_EtcdRequest, Haru_EtcdReply> {
+    return self.makeUnaryCall(
+      path: Haru_version1ClientMetadata.Methods.getEtcd.path,
+      request: request,
+      callOptions: callOptions ?? self.defaultCallOptions,
+      interceptors: self.interceptors?.makeGetEtcdInterceptors() ?? []
+    )
+  }
 }
 
 #if compiler(>=5.6)
@@ -749,6 +772,11 @@ internal protocol Haru_version1AsyncClientProtocol: GRPCClient {
     _ request: Haru_PlaceKakaoRequest,
     callOptions: CallOptions?
   ) -> GRPCAsyncUnaryCall<Haru_PlaceKakaoRequest, Haru_PlaceKakaoReply>
+
+  func makeGetEtcdCall(
+    _ request: Haru_EtcdRequest,
+    callOptions: CallOptions?
+  ) -> GRPCAsyncUnaryCall<Haru_EtcdRequest, Haru_EtcdReply>
 }
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
@@ -1036,6 +1064,18 @@ extension Haru_version1AsyncClientProtocol {
       interceptors: self.interceptors?.makeGetPlaceKaKaoInterceptors() ?? []
     )
   }
+
+  internal func makeGetEtcdCall(
+    _ request: Haru_EtcdRequest,
+    callOptions: CallOptions? = nil
+  ) -> GRPCAsyncUnaryCall<Haru_EtcdRequest, Haru_EtcdReply> {
+    return self.makeAsyncUnaryCall(
+      path: Haru_version1ClientMetadata.Methods.getEtcd.path,
+      request: request,
+      callOptions: callOptions ?? self.defaultCallOptions,
+      interceptors: self.interceptors?.makeGetEtcdInterceptors() ?? []
+    )
+  }
 }
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
@@ -1315,6 +1355,18 @@ extension Haru_version1AsyncClientProtocol {
       interceptors: self.interceptors?.makeGetPlaceKaKaoInterceptors() ?? []
     )
   }
+
+  internal func getEtcd(
+    _ request: Haru_EtcdRequest,
+    callOptions: CallOptions? = nil
+  ) async throws -> Haru_EtcdReply {
+    return try await self.performAsyncUnaryCall(
+      path: Haru_version1ClientMetadata.Methods.getEtcd.path,
+      request: request,
+      callOptions: callOptions ?? self.defaultCallOptions,
+      interceptors: self.interceptors?.makeGetEtcdInterceptors() ?? []
+    )
+  }
 }
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
@@ -1406,6 +1458,9 @@ internal protocol Haru_version1ClientInterceptorFactoryProtocol: GRPCSendable {
 
   /// - Returns: Interceptors to use when invoking 'getPlaceKaKao'.
   func makeGetPlaceKaKaoInterceptors() -> [ClientInterceptor<Haru_PlaceKakaoRequest, Haru_PlaceKakaoReply>]
+
+  /// - Returns: Interceptors to use when invoking 'getEtcd'.
+  func makeGetEtcdInterceptors() -> [ClientInterceptor<Haru_EtcdRequest, Haru_EtcdReply>]
 }
 
 internal enum Haru_version1ClientMetadata {
@@ -1436,6 +1491,7 @@ internal enum Haru_version1ClientMetadata {
       Haru_version1ClientMetadata.Methods.updateLike,
       Haru_version1ClientMetadata.Methods.getCount,
       Haru_version1ClientMetadata.Methods.getPlaceKaKao,
+      Haru_version1ClientMetadata.Methods.getEtcd,
     ]
   )
 
@@ -1577,6 +1633,12 @@ internal enum Haru_version1ClientMetadata {
       path: "/haru.version1/GetPlaceKaKao",
       type: GRPCCallType.unary
     )
+
+    internal static let getEtcd = GRPCMethodDescriptor(
+      name: "GetEtcd",
+      path: "/haru.version1/GetEtcd",
+      type: GRPCCallType.unary
+    )
   }
 }
 
@@ -1631,6 +1693,8 @@ internal protocol Haru_version1Provider: CallHandlerProvider {
   func getCount(request: Haru_Count, context: StatusOnlyCallContext) -> EventLoopFuture<Haru_Count>
 
   func getPlaceKaKao(request: Haru_PlaceKakaoRequest, context: StatusOnlyCallContext) -> EventLoopFuture<Haru_PlaceKakaoReply>
+
+  func getEtcd(request: Haru_EtcdRequest, context: StatusOnlyCallContext) -> EventLoopFuture<Haru_EtcdReply>
 }
 
 extension Haru_version1Provider {
@@ -1852,6 +1916,15 @@ extension Haru_version1Provider {
         userFunction: self.getPlaceKaKao(request:context:)
       )
 
+    case "GetEtcd":
+      return UnaryServerHandler(
+        context: context,
+        requestDeserializer: ProtobufDeserializer<Haru_EtcdRequest>(),
+        responseSerializer: ProtobufSerializer<Haru_EtcdReply>(),
+        interceptors: self.interceptors?.makeGetEtcdInterceptors() ?? [],
+        userFunction: self.getEtcd(request:context:)
+      )
+
     default:
       return nil
     }
@@ -1982,6 +2055,11 @@ internal protocol Haru_version1AsyncProvider: CallHandlerProvider {
     request: Haru_PlaceKakaoRequest,
     context: GRPCAsyncServerCallContext
   ) async throws -> Haru_PlaceKakaoReply
+
+  @Sendable func getEtcd(
+    request: Haru_EtcdRequest,
+    context: GRPCAsyncServerCallContext
+  ) async throws -> Haru_EtcdReply
 }
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
@@ -2210,6 +2288,15 @@ extension Haru_version1AsyncProvider {
         wrapping: self.getPlaceKaKao(request:context:)
       )
 
+    case "GetEtcd":
+      return GRPCAsyncServerHandler(
+        context: context,
+        requestDeserializer: ProtobufDeserializer<Haru_EtcdRequest>(),
+        responseSerializer: ProtobufSerializer<Haru_EtcdReply>(),
+        interceptors: self.interceptors?.makeGetEtcdInterceptors() ?? [],
+        wrapping: self.getEtcd(request:context:)
+      )
+
     default:
       return nil
     }
@@ -2311,6 +2398,10 @@ internal protocol Haru_version1ServerInterceptorFactoryProtocol {
   /// - Returns: Interceptors to use when handling 'getPlaceKaKao'.
   ///   Defaults to calling `self.makeInterceptors()`.
   func makeGetPlaceKaKaoInterceptors() -> [ServerInterceptor<Haru_PlaceKakaoRequest, Haru_PlaceKakaoReply>]
+
+  /// - Returns: Interceptors to use when handling 'getEtcd'.
+  ///   Defaults to calling `self.makeInterceptors()`.
+  func makeGetEtcdInterceptors() -> [ServerInterceptor<Haru_EtcdRequest, Haru_EtcdReply>]
 }
 
 internal enum Haru_version1ServerMetadata {
@@ -2341,6 +2432,7 @@ internal enum Haru_version1ServerMetadata {
       Haru_version1ServerMetadata.Methods.updateLike,
       Haru_version1ServerMetadata.Methods.getCount,
       Haru_version1ServerMetadata.Methods.getPlaceKaKao,
+      Haru_version1ServerMetadata.Methods.getEtcd,
     ]
   )
 
@@ -2480,6 +2572,12 @@ internal enum Haru_version1ServerMetadata {
     internal static let getPlaceKaKao = GRPCMethodDescriptor(
       name: "GetPlaceKaKao",
       path: "/haru.version1/GetPlaceKaKao",
+      type: GRPCCallType.unary
+    )
+
+    internal static let getEtcd = GRPCMethodDescriptor(
+      name: "GetEtcd",
+      path: "/haru.version1/GetEtcd",
       type: GRPCCallType.unary
     )
   }
