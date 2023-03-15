@@ -744,9 +744,9 @@ func (s *server) GetEtcd(ctx context.Context, in *pb.EtcdRequest) (*pb.EtcdReply
 	tracer.Trace(in)
 	switch in.Key {
 	case "ETCD_IS_AD":
-		in.Value = os.Getenv("IS_AD")
+		in.Value = os.Getenv("ETCD_IS_AD")
 	case "ETCD_INTERVAL_AD":
-		in.Value = os.Getenv("INTERVAL_AD")
+		in.Value = os.Getenv("ETCD_INTERVAL_AD")
 	}
 	ret := &pb.EtcdReply{Key: in.Key, Value: in.Value}
 
