@@ -47,6 +47,7 @@ service version1 {
   rpc GetCount (Count) returns (Count) {}
   rpc GetPlaceKaKao (PlaceKakaoRequest) returns (PlaceKakaoReply) {}
   rpc GetEtcd (EtcdRequest) returns (EtcdReply) {}
+  rpc DeleteGame (GameRequest) returns (GameReply) {}
 }
 
 message EtcdRequest {

@@ -146,6 +146,17 @@ func (s *server) UpdateGame(ctx context.Context, in *pb.GameRequest) (*pb.GameRe
 	return ret, nil
 }
 
+func (s *server) DeleteGame(ctx context.Context, in *pb.GameRequest) (*pb.GameReply, error) {
+	tracer.Trace(in)
+	key := datastore.IDKey(getDatastoreKind("Game"), in.Game.GetId(), nil)
+	ds.Delete(ctx, key)
+	// GameList에서도 삭제
+	ds.Delete(ctx, datastore.IDKey(getDatastoreKind("GameList"), in.Game.GetId(), nil))
+	ret := &pb.GameReply{Game: in.GetGame()}
+	go c.Delete(util.GetCacheKeyOfDatastoreKey(*key))
+	return ret, nil
+}
+
 // filterdGames에서는 Game 목록만 반환하고 GetGame에서는 attend, place 부가 정보 반환
 func (s *server) GetFilterdGames(ctx context.Context, in *pb.FilterdGamesRequest) (*pb.FilterdGamesReply, error) {
 	tracer.Trace(in)
@@ -624,7 +635,6 @@ func (s *server) CreateArticle(ctx context.Context, in *pb.ArticleRequest) (*pb.
 	tracer.Trace(in)
 	var article = in.Article
 	article.Created = time.Now().UTC().Unix()
-	log.Print("cret")
 	put := ds.Put(ctx, datastore.IncompleteKey(getDatastoreKind("Article"), nil), article)
 	article.Id = put.ID
 	ds.Put(ctx, datastore.IDKey(getDatastoreKind("Article"), put.ID, nil), article)

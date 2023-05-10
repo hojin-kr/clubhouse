@@ -54,3 +54,11 @@ func GetMulti(ctx context.Context, keys []*datastore.Key, dst interface{}) (err 
 	}
 	return err
 }
+
+func Delete(ctx context.Context, key *datastore.Key) (err error) {
+	client := GetClient(ctx)
+	if err := client.Delete(ctx, key); err != nil {
+		log.Printf("delete ds" + err.Error())
+	}
+	return err
+}
