@@ -201,3 +201,22 @@ indexes:
   properties:
   - name: AccountId
   - name: Start
+
+- kind: productionArticle
+  properties:
+  - name: Category
+  - name: Type
+  - name: Created
+
+- kind: productionArticle
+  properties:
+  - name: Category
+  - name: Type
+  - name: Created
+    direction: desc
+
+- kind: productionArticle
+  properties:
+  - name: AccountId
+  - name: Created
+    direction: desc
