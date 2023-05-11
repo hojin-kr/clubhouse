@@ -47,6 +47,7 @@ type Version1Client interface {
 	GetPlaceKaKao(ctx context.Context, in *PlaceKakaoRequest, opts ...grpc.CallOption) (*PlaceKakaoReply, error)
 	GetEtcd(ctx context.Context, in *EtcdRequest, opts ...grpc.CallOption) (*EtcdReply, error)
 	DeleteGame(ctx context.Context, in *GameRequest, opts ...grpc.CallOption) (*GameReply, error)
+	DeleteArticle(ctx context.Context, in *ArticleRequest, opts ...grpc.CallOption) (*ArticleReply, error)
 }
 
 type version1Client struct {
@@ -282,6 +283,15 @@ func (c *version1Client) DeleteGame(ctx context.Context, in *GameRequest, opts .
 	return out, nil
 }
 
+func (c *version1Client) DeleteArticle(ctx context.Context, in *ArticleRequest, opts ...grpc.CallOption) (*ArticleReply, error) {
+	out := new(ArticleReply)
+	err := c.cc.Invoke(ctx, "/haru.version1/DeleteArticle", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Version1Server is the server API for Version1 service.
 // All implementations must embed UnimplementedVersion1Server
 // for forward compatibility
@@ -311,6 +321,7 @@ type Version1Server interface {
 	GetPlaceKaKao(context.Context, *PlaceKakaoRequest) (*PlaceKakaoReply, error)
 	GetEtcd(context.Context, *EtcdRequest) (*EtcdReply, error)
 	DeleteGame(context.Context, *GameRequest) (*GameReply, error)
+	DeleteArticle(context.Context, *ArticleRequest) (*ArticleReply, error)
 	mustEmbedUnimplementedVersion1Server()
 }
 
@@ -392,6 +403,9 @@ func (UnimplementedVersion1Server) GetEtcd(context.Context, *EtcdRequest) (*Etcd
 }
 func (UnimplementedVersion1Server) DeleteGame(context.Context, *GameRequest) (*GameReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteGame not implemented")
+}
+func (UnimplementedVersion1Server) DeleteArticle(context.Context, *ArticleRequest) (*ArticleReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteArticle not implemented")
 }
 func (UnimplementedVersion1Server) mustEmbedUnimplementedVersion1Server() {}
 
@@ -856,6 +870,24 @@ func _Version1_DeleteGame_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Version1_DeleteArticle_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ArticleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(Version1Server).DeleteArticle(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/haru.version1/DeleteArticle",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(Version1Server).DeleteArticle(ctx, req.(*ArticleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Version1_ServiceDesc is the grpc.ServiceDesc for Version1 service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -962,6 +994,10 @@ var Version1_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteGame",
 			Handler:    _Version1_DeleteGame_Handler,
+		},
+		{
+			MethodName: "DeleteArticle",
+			Handler:    _Version1_DeleteArticle_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

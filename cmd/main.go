@@ -652,6 +652,14 @@ func (s *server) UpdateArticle(ctx context.Context, in *pb.ArticleRequest) (*pb.
 	return ret, nil
 }
 
+func (s *server) DeleteArticle(ctx context.Context, in *pb.ArticleRequest) (*pb.ArticleReply, error) {
+	tracer.Trace(in)
+	_ = ds.Delete(ctx, datastore.IDKey(getDatastoreKind("Article"), in.Article.GetId(), nil))
+	ret := &pb.ArticleReply{Article: in.GetArticle()}
+
+	return ret, nil
+}
+
 func (s *server) GetFilterdArticles(ctx context.Context, in *pb.FilterdArticlesRequest) (*pb.FilterdArticlesReply, error) {
 	tracer.Trace(in)
 	client := ds.GetClient(ctx)

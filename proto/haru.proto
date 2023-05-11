@@ -48,6 +48,7 @@ service version1 {
   rpc GetPlaceKaKao (PlaceKakaoRequest) returns (PlaceKakaoReply) {}
   rpc GetEtcd (EtcdRequest) returns (EtcdReply) {}
   rpc DeleteGame (GameRequest) returns (GameReply) {}
+  rpc DeleteArticle (ArticleRequest) returns (ArticleReply) {}
 }
 
 message EtcdRequest {

@@ -157,6 +157,11 @@ internal protocol Haru_version1ClientProtocol: GRPCClient {
     _ request: Haru_GameRequest,
     callOptions: CallOptions?
   ) -> UnaryCall<Haru_GameRequest, Haru_GameReply>
+
+  func deleteArticle(
+    _ request: Haru_ArticleRequest,
+    callOptions: CallOptions?
+  ) -> UnaryCall<Haru_ArticleRequest, Haru_ArticleReply>
 }
 
 extension Haru_version1ClientProtocol {
@@ -613,6 +618,24 @@ extension Haru_version1ClientProtocol {
       interceptors: self.interceptors?.makeDeleteGameInterceptors() ?? []
     )
   }
+
+  /// Unary call to DeleteArticle
+  ///
+  /// - Parameters:
+  ///   - request: Request to send to DeleteArticle.
+  ///   - callOptions: Call options.
+  /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
+  internal func deleteArticle(
+    _ request: Haru_ArticleRequest,
+    callOptions: CallOptions? = nil
+  ) -> UnaryCall<Haru_ArticleRequest, Haru_ArticleReply> {
+    return self.makeUnaryCall(
+      path: Haru_version1ClientMetadata.Methods.deleteArticle.path,
+      request: request,
+      callOptions: callOptions ?? self.defaultCallOptions,
+      interceptors: self.interceptors?.makeDeleteArticleInterceptors() ?? []
+    )
+  }
 }
 
 #if compiler(>=5.6)
@@ -805,6 +828,11 @@ internal protocol Haru_version1AsyncClientProtocol: GRPCClient {
     _ request: Haru_GameRequest,
     callOptions: CallOptions?
   ) -> GRPCAsyncUnaryCall<Haru_GameRequest, Haru_GameReply>
+
+  func makeDeleteArticleCall(
+    _ request: Haru_ArticleRequest,
+    callOptions: CallOptions?
+  ) -> GRPCAsyncUnaryCall<Haru_ArticleRequest, Haru_ArticleReply>
 }
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
@@ -1116,6 +1144,18 @@ extension Haru_version1AsyncClientProtocol {
       interceptors: self.interceptors?.makeDeleteGameInterceptors() ?? []
     )
   }
+
+  internal func makeDeleteArticleCall(
+    _ request: Haru_ArticleRequest,
+    callOptions: CallOptions? = nil
+  ) -> GRPCAsyncUnaryCall<Haru_ArticleRequest, Haru_ArticleReply> {
+    return self.makeAsyncUnaryCall(
+      path: Haru_version1ClientMetadata.Methods.deleteArticle.path,
+      request: request,
+      callOptions: callOptions ?? self.defaultCallOptions,
+      interceptors: self.interceptors?.makeDeleteArticleInterceptors() ?? []
+    )
+  }
 }
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
@@ -1419,6 +1459,18 @@ extension Haru_version1AsyncClientProtocol {
       interceptors: self.interceptors?.makeDeleteGameInterceptors() ?? []
     )
   }
+
+  internal func deleteArticle(
+    _ request: Haru_ArticleRequest,
+    callOptions: CallOptions? = nil
+  ) async throws -> Haru_ArticleReply {
+    return try await self.performAsyncUnaryCall(
+      path: Haru_version1ClientMetadata.Methods.deleteArticle.path,
+      request: request,
+      callOptions: callOptions ?? self.defaultCallOptions,
+      interceptors: self.interceptors?.makeDeleteArticleInterceptors() ?? []
+    )
+  }
 }
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
@@ -1516,6 +1568,9 @@ internal protocol Haru_version1ClientInterceptorFactoryProtocol: GRPCSendable {
 
   /// - Returns: Interceptors to use when invoking 'deleteGame'.
   func makeDeleteGameInterceptors() -> [ClientInterceptor<Haru_GameRequest, Haru_GameReply>]
+
+  /// - Returns: Interceptors to use when invoking 'deleteArticle'.
+  func makeDeleteArticleInterceptors() -> [ClientInterceptor<Haru_ArticleRequest, Haru_ArticleReply>]
 }
 
 internal enum Haru_version1ClientMetadata {
@@ -1548,6 +1603,7 @@ internal enum Haru_version1ClientMetadata {
       Haru_version1ClientMetadata.Methods.getPlaceKaKao,
       Haru_version1ClientMetadata.Methods.getEtcd,
       Haru_version1ClientMetadata.Methods.deleteGame,
+      Haru_version1ClientMetadata.Methods.deleteArticle,
     ]
   )
 
@@ -1701,6 +1757,12 @@ internal enum Haru_version1ClientMetadata {
       path: "/haru.version1/DeleteGame",
       type: GRPCCallType.unary
     )
+
+    internal static let deleteArticle = GRPCMethodDescriptor(
+      name: "DeleteArticle",
+      path: "/haru.version1/DeleteArticle",
+      type: GRPCCallType.unary
+    )
   }
 }
 
@@ -1759,6 +1821,8 @@ internal protocol Haru_version1Provider: CallHandlerProvider {
   func getEtcd(request: Haru_EtcdRequest, context: StatusOnlyCallContext) -> EventLoopFuture<Haru_EtcdReply>
 
   func deleteGame(request: Haru_GameRequest, context: StatusOnlyCallContext) -> EventLoopFuture<Haru_GameReply>
+
+  func deleteArticle(request: Haru_ArticleRequest, context: StatusOnlyCallContext) -> EventLoopFuture<Haru_ArticleReply>
 }
 
 extension Haru_version1Provider {
@@ -1998,6 +2062,15 @@ extension Haru_version1Provider {
         userFunction: self.deleteGame(request:context:)
       )
 
+    case "DeleteArticle":
+      return UnaryServerHandler(
+        context: context,
+        requestDeserializer: ProtobufDeserializer<Haru_ArticleRequest>(),
+        responseSerializer: ProtobufSerializer<Haru_ArticleReply>(),
+        interceptors: self.interceptors?.makeDeleteArticleInterceptors() ?? [],
+        userFunction: self.deleteArticle(request:context:)
+      )
+
     default:
       return nil
     }
@@ -2138,6 +2211,11 @@ internal protocol Haru_version1AsyncProvider: CallHandlerProvider {
     request: Haru_GameRequest,
     context: GRPCAsyncServerCallContext
   ) async throws -> Haru_GameReply
+
+  @Sendable func deleteArticle(
+    request: Haru_ArticleRequest,
+    context: GRPCAsyncServerCallContext
+  ) async throws -> Haru_ArticleReply
 }
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
@@ -2384,6 +2462,15 @@ extension Haru_version1AsyncProvider {
         wrapping: self.deleteGame(request:context:)
       )
 
+    case "DeleteArticle":
+      return GRPCAsyncServerHandler(
+        context: context,
+        requestDeserializer: ProtobufDeserializer<Haru_ArticleRequest>(),
+        responseSerializer: ProtobufSerializer<Haru_ArticleReply>(),
+        interceptors: self.interceptors?.makeDeleteArticleInterceptors() ?? [],
+        wrapping: self.deleteArticle(request:context:)
+      )
+
     default:
       return nil
     }
@@ -2493,6 +2580,10 @@ internal protocol Haru_version1ServerInterceptorFactoryProtocol {
   /// - Returns: Interceptors to use when handling 'deleteGame'.
   ///   Defaults to calling `self.makeInterceptors()`.
   func makeDeleteGameInterceptors() -> [ServerInterceptor<Haru_GameRequest, Haru_GameReply>]
+
+  /// - Returns: Interceptors to use when handling 'deleteArticle'.
+  ///   Defaults to calling `self.makeInterceptors()`.
+  func makeDeleteArticleInterceptors() -> [ServerInterceptor<Haru_ArticleRequest, Haru_ArticleReply>]
 }
 
 internal enum Haru_version1ServerMetadata {
@@ -2525,6 +2616,7 @@ internal enum Haru_version1ServerMetadata {
       Haru_version1ServerMetadata.Methods.getPlaceKaKao,
       Haru_version1ServerMetadata.Methods.getEtcd,
       Haru_version1ServerMetadata.Methods.deleteGame,
+      Haru_version1ServerMetadata.Methods.deleteArticle,
     ]
   )
 
@@ -2676,6 +2768,12 @@ internal enum Haru_version1ServerMetadata {
     internal static let deleteGame = GRPCMethodDescriptor(
       name: "DeleteGame",
       path: "/haru.version1/DeleteGame",
+      type: GRPCCallType.unary
+    )
+
+    internal static let deleteArticle = GRPCMethodDescriptor(
+      name: "DeleteArticle",
+      path: "/haru.version1/DeleteArticle",
       type: GRPCCallType.unary
     )
   }
